@@ -12,6 +12,13 @@
     "**/*.ts",
     "**/*.tsx",
     ".expo/types/**/*.ts",
-    "expo-env.d.ts"
+    "expo-env.d.ts",
+    "app/(tabs)/index.tsx",
+    "app/(tabs)/explore.tsx",
+    "components/ParallaxScrollView.tsx",
+    "app/index.tsx",
+    "app/Home/_layout.tsx",
+    "app/_layout.tsx",
+    ".expo/types/**/*.ts"
   ]
 }
