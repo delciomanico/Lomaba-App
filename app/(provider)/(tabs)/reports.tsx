@@ -5,12 +5,13 @@ import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Dimensions } from
 import { SafeAreaView } from "react-native-safe-area-context"
 import { Ionicons } from "@expo/vector-icons"
 import { useOrders } from "../../../contexts/OrderContext"
+import { FloatingRefreshButton } from "@/components/buttons/ButtonFloating"
 
 const { width } = Dimensions.get("window")
 const cardWidth = (width - 45) / 2
 
 export default function ProviderReportsScreen() {
-  const { orders } = useOrders()
+  const { orders, loadOrdersProvider } = useOrders()
   const [selectedPeriod, setSelectedPeriod] = useState<"today" | "week" | "month" | "year">("today")
 
   const getFilteredOrders = () => {
@@ -20,25 +21,25 @@ export default function ProviderReportsScreen() {
     switch (selectedPeriod) {
       case "today":
         return orders.filter((order) => {
-          const orderDate = new Date(order.createdAt)
+          const orderDate = new Date(order.created_at)
           return orderDate >= today
         })
       case "week":
         const weekAgo = new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000)
         return orders.filter((order) => {
-          const orderDate = new Date(order.createdAt)
+          const orderDate = new Date(order.created_at)
           return orderDate >= weekAgo
         })
       case "month":
         const monthAgo = new Date(today.getTime() - 30 * 24 * 60 * 60 * 1000)
         return orders.filter((order) => {
-          const orderDate = new Date(order.createdAt)
+          const orderDate = new Date(order.created_at)
           return orderDate >= monthAgo
         })
       case "year":
         const yearAgo = new Date(today.getTime() - 365 * 24 * 60 * 60 * 1000)
         return orders.filter((order) => {
-          const orderDate = new Date(order.createdAt)
+          const orderDate = new Date(order.created_at)
           return orderDate >= yearAgo
         })
       default:
@@ -50,7 +51,7 @@ export default function ProviderReportsScreen() {
   const deliveredOrders = filteredOrders.filter((order) => order.status === "delivered")
 
   const totalOrders = filteredOrders.length
-  const totalRevenue = deliveredOrders.reduce((sum, order) => sum + order.total, 0)
+  const totalRevenue = deliveredOrders.reduce((sum, order) => sum + order.total_amount, 0)
   const averageOrderValue = totalOrders > 0 ? totalRevenue / deliveredOrders.length : 0
   const pendingOrders = filteredOrders.filter((order) => order.status === "pending").length
 
@@ -96,10 +97,10 @@ export default function ProviderReportsScreen() {
   const productSales = deliveredOrders.reduce(
     (acc, order) => {
       order.items.forEach((item) => {
-        if (acc[item.name]) {
-          acc[item.name] += item.quantity
+        if (acc[item.product.name]) {
+          acc[item.product.name] += item.quantity
         } else {
-          acc[item.name] = item.quantity
+          acc[item.product.name] = item.quantity
         }
       })
       return acc
@@ -255,6 +256,7 @@ export default function ProviderReportsScreen() {
           </View>
         </View>
       </ScrollView>
+        <FloatingRefreshButton onRefresh={loadOrdersProvider}/>
     </SafeAreaView>
   )
 }

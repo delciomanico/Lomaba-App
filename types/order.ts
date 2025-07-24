@@ -17,11 +17,13 @@ export interface Order {
     status: OrderStatus
     created_at: string
     delivery_address: string
+    latitude: number
+    longitude: number
     provider_id: string | null
     customer_id: string | null
     customer_name: string
     customer_phone: string
-    estimated_delivery?: string
+    estimated_delivery: string
     delivery_fee: number
     items: OrderItem[]
 }
@@ -35,6 +37,8 @@ export interface OrderContextType {
     createOrder: (
         items: Omit<OrderItem, "id" | "order_id">[],
         deliveryAddress: string,
+        latitude: number,
+        longitude: number,
         customerName: string,
         customerPhone: string,
     ) => Promise<string>
@@ -42,4 +46,11 @@ export interface OrderContextType {
     getOrderById: (orderId: string) => Promise<Order | null>
     getOrdersByStatus: (status: OrderStatus) => Promise<Order[]>
     refreshOrders: () => Promise<void>
+}
+
+///jguiggu
+
+export interface FloatingRefreshButtonProps {
+  onRefresh: () => Promise<void> | void;
+  isLoading?: boolean;
 }

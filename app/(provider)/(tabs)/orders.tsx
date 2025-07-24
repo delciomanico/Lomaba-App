@@ -7,6 +7,7 @@ import { Ionicons } from "@expo/vector-icons"
 import { useRouter } from "expo-router"
 import { useOrders } from "../../../contexts/OrderContext"
 import { Order, OrderStatus } from "@/types/order"
+import { FloatingRefreshButton } from "@/components/buttons/ButtonFloating"
 
 const statusColors = {
   pending: "#FFA500",
@@ -27,7 +28,7 @@ const statusLabels = {
 }
 
 export default function ProviderOrdersScreen() {
-  const { orders, updateOrderStatus } = useOrders()
+  const { orders, updateOrderStatus, loadOrdersProvider } = useOrders()
   const router = useRouter()
   const [filter, setFilter] = useState<"all" | "pending" | "confirmed" | "preparing" | "delivering">("all")
 
@@ -110,7 +111,7 @@ export default function ProviderOrdersScreen() {
       <View style={styles.orderFooter}>
         <Text style={styles.orderTotal}>Total: {item.total_amount.toLocaleString("pt-AO")} Kz</Text>
         <Text style={styles.orderTime}>
-          {new Date(item.created_at).toLocaleTimeString("pt-AO",{
+          {new Date(item.estimated_delivery).toLocaleTimeString("pt-AO",{
             hour: "2-digit",
             minute: "2-digit",
           })}
@@ -188,6 +189,7 @@ export default function ProviderOrdersScreen() {
           showsVerticalScrollIndicator={false}
         />
       )}
+      <FloatingRefreshButton onRefresh={loadOrdersProvider}/>
     </SafeAreaView>
   )
 }

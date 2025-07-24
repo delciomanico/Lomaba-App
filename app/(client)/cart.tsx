@@ -17,9 +17,11 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context"
 import { Ionicons } from "@expo/vector-icons"
 import { useRouter } from "expo-router"
-import { useCart } from "../../contexts/CartContext"
-import { useOrders } from "../../contexts/OrderContext"
-import { useAuth } from "../../contexts/AuthContext"
+import { useCart } from "@/contexts/CartContext"
+import { useOrders } from "@/contexts/OrderContext"
+import { useAuth } from "@/contexts/AuthContext"
+import { OrderItem } from "@/types/order"
+import * as Location from "expo-location"
 
 export default function CartScreen() {
   const { cartItems, updateQuantity, removeFromCart, getTotalPrice, clearCart } = useCart()
@@ -65,7 +67,16 @@ export default function CartScreen() {
         quantity: item.quantity,
       }))
 
-      const orderId = await createOrder(orderItems, deliveryAddress, customerName, customerPhone)
+      const { status } = await Location.requestForegroundPermissionsAsync()
+      if (status !== 'granted') {
+        console.warn('Permissão de localização negada')
+        return
+      }
+
+      const location = await Location.getCurrentPositionAsync({})
+      const { latitude, longitude } = location.coords
+      const orderId = await createOrder(orderItems as Omit<OrderItem, "id" | "order_id">[], deliveryAddress,latitude, longitude, customerName, customerPhone)
+
       clearCart()
 
       Alert.alert("Pedido Realizado!", "Seu pedido foi enviado com sucesso!", [
@@ -113,60 +124,60 @@ export default function CartScreen() {
   )
 
   const checkComponent = () => (
-      <View style={styles.checkoutSection}>
-        <View style={styles.deliveryForm}>
-          <Text style={styles.formTitle}>Dados da Entrega</Text>
+    <View style={styles.checkoutSection}>
+      <View style={styles.deliveryForm}>
+        <Text style={styles.formTitle}>Dados da Entrega</Text>
 
-          <TextInput
-            style={styles.input}
-            placeholder="Nome completo"
-            value={customerName}
-            onChangeText={setCustomerName}
-          />
+        <TextInput
+          style={styles.input}
+          placeholder="Nome completo"
+          value={customerName}
+          onChangeText={setCustomerName}
+        />
 
-          <TextInput
-            style={styles.input}
-            placeholder="Telefone"
-            value={customerPhone}
-            onChangeText={setCustomerPhone}
-            keyboardType="phone-pad"
-          />
+        <TextInput
+          style={styles.input}
+          placeholder="Telefone"
+          value={customerPhone}
+          onChangeText={setCustomerPhone}
+          keyboardType="phone-pad"
+        />
 
-          <TextInput
-            style={[styles.input, styles.addressInput]}
-            placeholder="Endereço de entrega completo"
-            value={deliveryAddress}
-            onChangeText={setDeliveryAddress}
-            multiline
-            numberOfLines={3}
-            placeholderTextColor={"#aaa"}
-          />
-        </View>
-
-        <View style={styles.summary}>
-          <View style={styles.summaryRow}>
-            <Text style={styles.summaryLabel}>Subtotal</Text>
-            <Text style={styles.summaryValue}>{subtotal.toLocaleString("pt-AO")} Kz</Text>
-          </View>
-          <View style={styles.summaryRow}>
-            <Text style={styles.summaryLabel}>Taxa de entrega</Text>
-            <Text style={styles.summaryValue}>{deliveryFee.toLocaleString("pt-AO")} Kz</Text>
-          </View>
-          <View style={[styles.summaryRow, styles.totalRow]}>
-            <Text style={styles.totalLabel}>Total</Text>
-            <Text style={styles.totalValue}>{total.toLocaleString("pt-AO")} Kz</Text>
-          </View>
-        </View>
-
-        <TouchableOpacity
-          style={[styles.checkoutButton, loading && styles.checkoutButtonDisabled]}
-          onPress={handleCheckout}
-          disabled={loading}
-        >
-          <Text style={styles.checkoutButtonText}>{loading ? "Processando..." : "Finalizar Pedido"}</Text>
-        </TouchableOpacity>
+        <TextInput
+          style={[styles.input, styles.addressInput]}
+          placeholder="Endereço de entrega completo"
+          value={deliveryAddress}
+          onChangeText={setDeliveryAddress}
+          multiline
+          numberOfLines={3}
+          placeholderTextColor={"#aaa"}
+        />
       </View>
-  
+
+      <View style={styles.summary}>
+        <View style={styles.summaryRow}>
+          <Text style={styles.summaryLabel}>Subtotal</Text>
+          <Text style={styles.summaryValue}>{subtotal.toLocaleString("pt-AO")} Kz</Text>
+        </View>
+        <View style={styles.summaryRow}>
+          <Text style={styles.summaryLabel}>Taxa de entrega</Text>
+          <Text style={styles.summaryValue}>{deliveryFee.toLocaleString("pt-AO")} Kz</Text>
+        </View>
+        <View style={[styles.summaryRow, styles.totalRow]}>
+          <Text style={styles.totalLabel}>Total</Text>
+          <Text style={styles.totalValue}>{total.toLocaleString("pt-AO")} Kz</Text>
+        </View>
+      </View>
+
+      <TouchableOpacity
+        style={[styles.checkoutButton, loading && styles.checkoutButtonDisabled]}
+        onPress={handleCheckout}
+        disabled={loading}
+      >
+        <Text style={styles.checkoutButtonText}>{loading ? "Processando..." : "Finalizar Pedido"}</Text>
+      </TouchableOpacity>
+    </View>
+
   )
   if (cartItems.length === 0) {
     return (
@@ -203,14 +214,14 @@ export default function CartScreen() {
             <Text style={styles.clearText}>Limpar</Text>
           </TouchableOpacity>
         </View>
-          <FlatList
-            data={cartItems}
-            renderItem={renderCartItem}
-            ListHeaderComponent={checkComponent}
-            keyExtractor={(item) => item.id}
-            contentContainerStyle={styles.cartList}
-            showsVerticalScrollIndicator={false}
-          />
+        <FlatList
+          data={cartItems}
+          renderItem={renderCartItem}
+          ListHeaderComponent={checkComponent}
+          keyExtractor={(item) => item.id}
+          contentContainerStyle={styles.cartList}
+          showsVerticalScrollIndicator={false}
+        />
       </KeyboardAvoidingView>
     </SafeAreaView>
   )

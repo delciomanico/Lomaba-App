@@ -122,15 +122,15 @@ export default function ProviderProfileScreen() {
         {/* Business Stats */}
         <View style={styles.statsContainer}>
           <View style={styles.statItem}>
-            <Text style={styles.statValue}>156</Text>
+            <Text style={styles.statValue}>0</Text>
             <Text style={styles.statLabel}>Pedidos</Text>
           </View>
           <View style={styles.statItem}>
-            <Text style={styles.statValue}>4.8</Text>
+            <Text style={styles.statValue}>0.0</Text>
             <Text style={styles.statLabel}>Avaliação</Text>
           </View>
           <View style={styles.statItem}>
-            <Text style={styles.statValue}>98%</Text>
+            <Text style={styles.statValue}>0%</Text>
             <Text style={styles.statLabel}>Entregas</Text>
           </View>
         </View>

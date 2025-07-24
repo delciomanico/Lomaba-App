@@ -8,6 +8,7 @@ import { useOrders } from "@/contexts/OrderContext"
 import { useAuth } from "@/contexts/AuthContext"
 import { Order, OrderContextType } from "@/types/order"
 import { useEffect, useState } from "react"
+import { openGoogleMaps } from "@/lib/helper/openGoogleMaps"
 
 const statusColors = {
   pending: "#FFA500",
@@ -127,7 +128,7 @@ export default function OrderDetailScreen() {
               <Ionicons name="time" size={16} color="#FF6B35" />
               <Text style={styles.deliveryText}>
                 Entrega prevista:{" "}
-                {order.estimated_delivery.toLocaleTimeString("pt-AO", {
+                {new Date(order.estimated_delivery).toLocaleTimeString("pt-AO", {
                   hour: "2-digit",
                   minute: "2-digit",
                 })}
@@ -148,10 +149,10 @@ export default function OrderDetailScreen() {
               <Ionicons name="call" size={20} color="#666" />
               <Text style={styles.infoText}>{order.customer_phone}</Text>
             </View>
-            <View style={styles.infoRow}>
-              <Ionicons name="location" size={20} color="#666" />
+            <TouchableOpacity style={styles.infoRow} onPress={()=> openGoogleMaps(order.latitude, order.longitude, order.delivery_address)}>
+              <Ionicons name="location" size={40} color="#666" />
               <Text style={styles.infoText}>{order.delivery_address}</Text>
-            </View>
+            </TouchableOpacity>
           </View>
         </View>
 

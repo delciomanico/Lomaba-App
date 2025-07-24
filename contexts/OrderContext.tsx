@@ -14,7 +14,7 @@ export function OrderProvider({ children }: { children: React.ReactNode }) {
     useEffect(() => {
         loadOrdersProvider();
     }, []);
-
+    
 
     const loadOrders = async () => {
         setLoading(true)
@@ -25,7 +25,6 @@ export function OrderProvider({ children }: { children: React.ReactNode }) {
                 .select("*")
                 .eq('customer_id', `${user?.id}`)
                 .order("created_at", { ascending: false })
-
 
             if (ordersError) throw ordersError
 
@@ -88,6 +87,8 @@ export function OrderProvider({ children }: { children: React.ReactNode }) {
     const createOrder = async (
         items: Omit<OrderItem, "id" | "order_id">[],
         deliveryAddress: string,
+        latitude: number,
+        longitude: number,
         customerName: string,
         customerPhone: string,
     ): Promise<string> => {
@@ -111,6 +112,8 @@ export function OrderProvider({ children }: { children: React.ReactNode }) {
                     total_amount,
                     status: "pending",
                     delivery_address: deliveryAddress,
+                    latitude: latitude,
+                    longitude: longitude,
                     customer_name: customerName,
                     customer_phone: customerPhone,
                     delivery_fee: deliveryFee,

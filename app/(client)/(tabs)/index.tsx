@@ -9,6 +9,7 @@ import { useCart } from "../../../contexts/CartContext"
 import { useProductContext } from "../../../contexts/ProductContext"
 import {useOrders} from "@/contexts/OrderContext"
 import * as Location from 'expo-location'
+import { FloatingRefreshButton } from "@/components/buttons/ButtonFloating"
 
 const { width } = Dimensions.get("window")
 const itemWidth = (width - 45) / 2
@@ -187,6 +188,7 @@ export default function ClientHomeScreen() {
         columnWrapperStyle={styles.productRow}
         showsVerticalScrollIndicator={false}
       />
+      <FloatingRefreshButton onRefresh={loadOrders}/>
     </SafeAreaView>
   )
 }
@@ -262,6 +264,7 @@ const styles = StyleSheet.create({
     marginRight: 10,
     borderWidth: 1,
     borderColor: "#FF6B35",
+    maxHeight: 40,
   },
   categoryButtonActive: {
     backgroundColor: "#FF6B35",

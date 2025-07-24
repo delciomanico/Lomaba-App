@@ -4,6 +4,8 @@ import { SafeAreaView } from "react-native-safe-area-context"
 import { Ionicons } from "@expo/vector-icons"
 import { useRouter } from "expo-router"
 import { useOrders } from "../../../contexts/OrderContext"
+import { Order, OrderItem } from "@/types/order"
+import { FloatingRefreshButton } from "@/components/buttons/ButtonFloating"
 
 const statusColors = {
   pending: "#FFA500",
@@ -24,28 +26,28 @@ const statusLabels = {
 }
 
 export default function ClientOrdersScreen() {
-  const { orders } = useOrders()
+  const { orders, loadOrders } = useOrders()
   const router = useRouter()
 
   const activeOrders = orders.filter((order) =>
     ["pending", "confirmed", "preparing", "delivering"].includes(order.status),
   )
 
-  const renderOrder = ({ item }: { item: any }) => (
+  const renderOrder = ({ item }: { item: Order }) => (
     <TouchableOpacity style={styles.orderCard} onPress={() => router.push(`/order/${item.id}`)}>
       <View style={styles.orderHeader}>
-        <Text style={styles.orderId}>Pedido #{}</Text>
+        <Text style={styles.orderId}>Pedido #{item.id.slice(0,10)}</Text>
         <View style={[styles.statusBadge, { backgroundColor: statusColors[item.status] }]}>
           <Text style={styles.statusText}>{statusLabels[item.status]}</Text>
         </View>
       </View>
 
       <View style={styles.orderItems}>
-        {item.items.slice(0, 2).map((orderItem: any, index: number) => (
+        {item.items.slice(0, 2).map((orderItem: OrderItem, index: number) => (
           <View key={index} style={styles.orderItem}>
-            <Image source={{ uri: orderItem.image }} style={styles.itemImage} />
+            <Image source={{ uri: orderItem.product.image_url }} style={styles.itemImage} />
             <View style={styles.itemInfo}>
-              <Text style={styles.itemName}>{orderItem.name}</Text>
+              <Text style={styles.itemName}>{orderItem.product.name}</Text>
               <Text style={styles.itemQuantity}>Qtd: {orderItem.quantity}</Text>
             </View>
           </View>
@@ -58,12 +60,12 @@ export default function ClientOrdersScreen() {
         <Text style={styles.orderDate}>{ new Date(item.created_at).toLocaleDateString("pt-AO")}</Text>
       </View>
 
-      {item.estimatedDelivery && item.status === "delivering" && (
+      {item.estimated_delivery && item.status === "delivering" && (
         <View style={styles.deliveryInfo}>
           <Ionicons name="time" size={16} color="#FF6B35" />
           <Text style={styles.deliveryText}>
             Entrega prevista:{" "}
-            {item.estimatedDelivery.toLocaleTimeString("pt-AO", {
+            {new Date(item.estimated_delivery).toLocaleTimeString("pt-AO", {
               hour: "2-digit",
               minute: "2-digit",
             })}
@@ -94,6 +96,8 @@ export default function ClientOrdersScreen() {
           showsVerticalScrollIndicator={false}
         />
       )}
+
+      <FloatingRefreshButton onRefresh={loadOrders}/>
     </SafeAreaView>
   )
 }
