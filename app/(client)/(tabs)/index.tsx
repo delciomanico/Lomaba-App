@@ -7,6 +7,7 @@ import { Ionicons } from "@expo/vector-icons"
 import { useRouter } from "expo-router"
 import { useCart } from "../../../contexts/CartContext"
 import { useProductContext } from "../../../contexts/ProductContext"
+import {useOrders} from "@/contexts/OrderContext"
 import * as Location from 'expo-location'
 
 const { width } = Dimensions.get("window")
@@ -83,8 +84,11 @@ export default function ClientHomeScreen() {
   const router = useRouter()
   const { addToCart, cartItems } = useCart()
   const { products, fetchProductsNearby } = useProductContext()
+  const { loadOrders } = useOrders()
 
-
+  useEffect(()=>{
+      loadOrders();
+  },[]);
 
   useEffect(() => {
     (async () => {

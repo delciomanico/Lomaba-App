@@ -99,18 +99,7 @@ export default function OrderDetailScreen() {
         })
     }
 
-    const handleStatusUpdate = async (newStatus: string) => {
-        setUpdating(true)
-        try {
-            await updateOrderStatus(order?.id as string, newStatus as any)
-            const updatedOrder = await getOrderById(id as string)
-            setOrder(updatedOrder)
-        } catch (error) {
-            Alert.alert("Erro", "Não foi possível atualizar o status do pedido")
-        } finally {
-            setUpdating(false)
-        }
-    }
+  
 
     const handleCancelOrder = async () => {
         setUpdating(true)

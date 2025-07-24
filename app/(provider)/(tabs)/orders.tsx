@@ -6,6 +6,7 @@ import { SafeAreaView } from "react-native-safe-area-context"
 import { Ionicons } from "@expo/vector-icons"
 import { useRouter } from "expo-router"
 import { useOrders } from "../../../contexts/OrderContext"
+import { Order, OrderStatus } from "@/types/order"
 
 const statusColors = {
   pending: "#FFA500",
@@ -54,7 +55,7 @@ export default function ProviderOrdersScreen() {
           { text: "Cancelar", style: "cancel" },
           {
             text: "Confirmar",
-            onPress: () => updateOrderStatus(orderId, nextStatus as any),
+            onPress: () => updateOrderStatus(orderId, nextStatus as OrderStatus),
           },
         ],
       )
@@ -72,13 +73,14 @@ export default function ProviderOrdersScreen() {
     ])
   }
 
-  const renderOrder = ({ item }: { item: any }) => (
-    <TouchableOpacity style={styles.orderCard} onPress={() => router.push(`/order/${item.id}`)}>
+ 
+  const renderOrder = ({ item }: { item: Order }) => (
+    <TouchableOpacity style={styles.orderCard} onPress={() => router.push(`/(provider)/order/${item.id}`)}>
       <View style={styles.orderHeader}>
         <View>
-          <Text style={styles.orderId}>Pedido #{item.id}</Text>
-          <Text style={styles.customerName}>{item.customerName}</Text>
-          <Text style={styles.customerPhone}>{item.customerPhone}</Text>
+          <Text style={styles.orderId}>Pedido #{item.id.slice(0,10)}</Text>
+          <Text style={styles.customerName}>{item.customer_name}</Text>
+          <Text style={styles.customerPhone}>{item.customer_phone} </Text>
         </View>
         <View style={[styles.statusBadge, { backgroundColor: statusColors[item.status] }]}>
           <Text style={styles.statusText}>{statusLabels[item.status]}</Text>
@@ -88,7 +90,7 @@ export default function ProviderOrdersScreen() {
       <View style={styles.orderItems}>
         {item.items.slice(0, 2).map((orderItem: any, index: number) => (
           <View key={index} style={styles.orderItem}>
-            <Image source={{ uri: orderItem.image }} style={styles.itemImage} />
+            <Image source={{ uri: orderItem.product.image_url }} style={styles.itemImage} />
             <View style={styles.itemInfo}>
               <Text style={styles.itemName}>{orderItem.name}</Text>
               <Text style={styles.itemQuantity}>Qtd: {orderItem.quantity}</Text>
@@ -101,7 +103,7 @@ export default function ProviderOrdersScreen() {
       <View style={styles.deliveryInfo}>
         <Ionicons name="location" size={16} color="#666" />
         <Text style={styles.deliveryAddress} numberOfLines={2}>
-          {item.deliveryAddress}
+          {item.delivery_address}
         </Text>
       </View>
 
@@ -127,7 +129,7 @@ export default function ProviderOrdersScreen() {
           </TouchableOpacity>
         )}
 
-        {item.status === "pending" && (
+        {item.status === "confirmed" && (
           <TouchableOpacity style={styles.cancelButton} onPress={() => handleCancelOrder(item.id)}>
             <Text style={styles.cancelButtonText}>Cancelar</Text>
           </TouchableOpacity>

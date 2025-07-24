@@ -4,8 +4,10 @@ import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image, Alert } fr
 import { SafeAreaView } from "react-native-safe-area-context"
 import { Ionicons } from "@expo/vector-icons"
 import { useRouter, useLocalSearchParams } from "expo-router"
-import { useOrders } from "../../contexts/OrderContext"
-import { useAuth } from "../../contexts/AuthContext"
+import { useOrders } from "@/contexts/OrderContext"
+import { useAuth } from "@/contexts/AuthContext"
+import { Order, OrderContextType } from "@/types/order"
+import { useEffect, useState } from "react"
 
 const statusColors = {
   pending: "#FFA500",
@@ -30,8 +32,21 @@ export default function OrderDetailScreen() {
   const router = useRouter()
   const { getOrderById, updateOrderStatus } = useOrders()
   const { userType } = useAuth()
+  const [order, setOrder] = useState<Order | null>(null);
 
-  const order = getOrderById(id as string)
+  useEffect(() => {
+          const loadOrder = async () => {
+              try {
+                  const orderData = await getOrderById(id as string)
+                  setOrder(orderData)
+              } catch (error) {
+                  console.error("Failed to load order:", error)
+                  Alert.alert("Erro", "Não foi possível carregar os dados do pedido")
+              } 
+          }
+  
+          loadOrder()
+  }, [id])
 
   if (!order) {
     return (
@@ -90,7 +105,7 @@ export default function OrderDetailScreen() {
         <TouchableOpacity onPress={() => router.back()}>
           <Ionicons name="arrow-back" size={24} color="#333" />
         </TouchableOpacity>
-        <Text style={styles.title}>Pedido #{order.id}</Text>
+        <Text style={styles.title}>Pedido #{order.id.slice(0,10)}</Text>
         <View style={{ width: 24 }} />
       </View>
 
@@ -101,18 +116,18 @@ export default function OrderDetailScreen() {
             <Text style={styles.statusText}>{statusLabels[order.status]}</Text>
           </View>
           <Text style={styles.orderDate}>
-            Pedido realizado em {order.createdAt.toLocaleDateString("pt-AO")} às{" "}
-            {order.createdAt.toLocaleTimeString("pt-AO", {
+            Pedido realizado em {new Date(order.created_at).toLocaleDateString("pt-AO")} às{" "}
+            {new Date(order.created_at).toLocaleTimeString("pt-AO", {
               hour: "2-digit",
               minute: "2-digit",
             })}
           </Text>
-          {order.estimatedDelivery && order.status === "delivering" && (
+          {order.estimated_delivery && order.status === "delivering" && (
             <View style={styles.deliveryEstimate}>
               <Ionicons name="time" size={16} color="#FF6B35" />
               <Text style={styles.deliveryText}>
                 Entrega prevista:{" "}
-                {order.estimatedDelivery.toLocaleTimeString("pt-AO", {
+                {order.estimated_delivery.toLocaleTimeString("pt-AO", {
                   hour: "2-digit",
                   minute: "2-digit",
                 })}
@@ -127,15 +142,15 @@ export default function OrderDetailScreen() {
           <View style={styles.customerInfo}>
             <View style={styles.infoRow}>
               <Ionicons name="person" size={20} color="#666" />
-              <Text style={styles.infoText}>{order.customerName}</Text>
+              <Text style={styles.infoText}>{order.customer_name}</Text>
             </View>
             <View style={styles.infoRow}>
               <Ionicons name="call" size={20} color="#666" />
-              <Text style={styles.infoText}>{order.customerPhone}</Text>
+              <Text style={styles.infoText}>{order.customer_phone}</Text>
             </View>
             <View style={styles.infoRow}>
               <Ionicons name="location" size={20} color="#666" />
-              <Text style={styles.infoText}>{order.deliveryAddress}</Text>
+              <Text style={styles.infoText}>{order.delivery_address}</Text>
             </View>
           </View>
         </View>
@@ -146,13 +161,13 @@ export default function OrderDetailScreen() {
           <View style={styles.itemsList}>
             {order.items.map((item, index) => (
               <View key={index} style={styles.orderItem}>
-                <Image source={{ uri: item.image }} style={styles.itemImage} />
+                <Image source={{ uri: item.product.image_url }} style={styles.itemImage} />
                 <View style={styles.itemInfo}>
-                  <Text style={styles.itemName}>{item.name}</Text>
-                  <Text style={styles.itemPrice}>{item.price.toLocaleString("pt-AO")} Kz</Text>
+                  <Text style={styles.itemName}>{item.product.name}</Text>
+                  <Text style={styles.itemPrice}>{item.unit_price.toLocaleString("pt-AO")} Kz</Text>
                   <Text style={styles.itemQuantity}>Quantidade: {item.quantity}</Text>
                 </View>
-                <Text style={styles.itemTotal}>{(item.price * item.quantity).toLocaleString("pt-AO")} Kz</Text>
+                <Text style={styles.itemTotal}>{(item.unit_price * item.quantity).toLocaleString("pt-AO")} Kz</Text>
               </View>
             ))}
           </View>
@@ -164,15 +179,15 @@ export default function OrderDetailScreen() {
           <View style={styles.summary}>
             <View style={styles.summaryRow}>
               <Text style={styles.summaryLabel}>Subtotal</Text>
-              <Text style={styles.summaryValue}>{(order.total - order.deliveryFee).toLocaleString("pt-AO")} Kz</Text>
+              <Text style={styles.summaryValue}>{(order.total_amount - order.delivery_fee).toLocaleString("pt-AO")} Kz</Text>
             </View>
             <View style={styles.summaryRow}>
               <Text style={styles.summaryLabel}>Taxa de entrega</Text>
-              <Text style={styles.summaryValue}>{order.deliveryFee.toLocaleString("pt-AO")} Kz</Text>
+              <Text style={styles.summaryValue}>{order.delivery_fee.toLocaleString("pt-AO")} Kz</Text>
             </View>
             <View style={[styles.summaryRow, styles.totalRow]}>
               <Text style={styles.totalLabel}>Total</Text>
-              <Text style={styles.totalValue}>{order.total.toLocaleString("pt-AO")} Kz</Text>
+              <Text style={styles.totalValue}>{order.total_amount.toLocaleString("pt-AO")} Kz</Text>
             </View>
           </View>
         </View>

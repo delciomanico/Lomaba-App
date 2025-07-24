@@ -19,7 +19,7 @@ export default function ProviderDashboardScreen() {
   const todayOrders = orders.filter((order) => {
     const today = new Date()
     const orderDate = new Date(order.created_at)
-    return orderDate.toDateString() === today.toDateString()
+    return orderDate.toDateString() === today.toDateString() && order.provider_id === user?.id
   }).length
 
   const todayRevenue = orders
@@ -88,7 +88,9 @@ export default function ProviderDashboardScreen() {
     },
   ]
 
-  const recentOrders = orders.slice(0, 3)
+  const recentOrders = orders.slice(0, 3).filter((order)=>{
+    return order.provider_id === user?.id;
+  })
 
   return (
     <SafeAreaView style={styles.container}>

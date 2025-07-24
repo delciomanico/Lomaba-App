@@ -4,6 +4,7 @@ export default function ProviderLayout() {
   return (
     <Stack screenOptions={{ headerShown: false }}>
       <Stack.Screen name="(tabs)" />
+       <Stack.Screen name="order/[id]" />
     </Stack>
   )
 }

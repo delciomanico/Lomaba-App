@@ -1,46 +1,7 @@
 import { createContext, useContext, useState, useEffect } from "react"
-import { supabase } from "../lib/supabase.ts"
-
-
-
-interface OrderItem {
-    id: string;
-    order_id: string;
-    product_id: string;
-    quantity: number;
-    unit_price: number;
-}
-
-type OrderStatus = "pending" | "confirmed" | "preparing" | "delivering" | "delivered" | "cancelled"
-
-interface Order {
-    id: string
-    total_amount: number
-    status: OrderStatus
-    created_at: string
-    delivery_address: string
-    customer_name: string
-    customer_phone: string
-    estimated_delivery?: string
-    delivery_fee: number
-    items: OrderItem[]
-}
-
-interface OrderContextType {
-    orders: Order[]
-    loading: boolean
-    error: string | null
-    createOrder: (
-        items: Omit<OrderItem, "id" | "order_id">[],
-        deliveryAddress: string,
-        customerName: string,
-        customerPhone: string,
-    ) => Promise<string>
-    updateOrderStatus: (orderId: string, status: OrderStatus) => Promise<void>
-    getOrderById: (orderId: string) => Promise<Order | null>
-    getOrdersByStatus: (status: OrderStatus) => Promise<Order[]>
-    refreshOrders: () => Promise<void>
-}
+import { supabase } from "../lib/supabase"
+import { useAuth } from "./AuthContext";
+import { Order, OrderContextType, OrderItem, OrderStatus } from "@/types/order";
 
 const OrderContext = createContext<OrderContextType | undefined>(undefined)
 
@@ -48,10 +9,12 @@ export function OrderProvider({ children }: { children: React.ReactNode }) {
     const [orders, setOrders] = useState<Order[]>([])
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState<string | null>(null)
+    const { user, logout } = useAuth()
 
     useEffect(() => {
-        loadOrders()
-    }, [])
+        loadOrdersProvider();
+    }, []);
+
 
     const loadOrders = async () => {
         setLoading(true)
@@ -60,7 +23,43 @@ export function OrderProvider({ children }: { children: React.ReactNode }) {
             const { data: ordersData, error: ordersError } = await supabase
                 .from("orders")
                 .select("*")
+                .eq('customer_id', `${user?.id}`)
                 .order("created_at", { ascending: false })
+
+
+            if (ordersError) throw ordersError
+
+            const ordersWithItems = await Promise.all(
+                ordersData.map(async (order) => {
+                    const { data: itemsData, error: itemsError } = await supabase
+                        .from("order_items")
+                        .select("*, product:products(*)")
+                        .eq("order_id", order.id)
+
+                    if (itemsError) throw itemsError
+
+                    return { ...order, items: itemsData }
+                })
+            )
+
+            setOrders(ordersWithItems)
+        } catch (err) {
+            console.error("Error loading orders:", err)
+            setError("Failed to load orders")
+        } finally {
+            setLoading(false)
+        }
+    }
+
+    const loadOrdersProvider = async () => {
+        setLoading(true)
+        setError(null)
+        try {
+            const { data: ordersData, error: ordersError } = await supabase
+                .from("orders")
+                .select("*")
+                .order("created_at", { ascending: false })
+
 
             if (ordersError) throw ordersError
 
@@ -134,6 +133,7 @@ export function OrderProvider({ children }: { children: React.ReactNode }) {
             if (itemsError) throw itemsError
 
             await loadOrders()
+            await loadOrdersProvider()
             return orderData.id
         } catch (err) {
             console.error("Error creating order:", err)
@@ -148,13 +148,19 @@ export function OrderProvider({ children }: { children: React.ReactNode }) {
         setLoading(true)
         setError(null)
         try {
-            const { error } = await supabase
-                .from("orders")
-                .update({ status })
-                .eq("id", orderId)
+            if (user?.type === "client") {
+                var { error } = await supabase
+                    .from("orders")
+                    .update({ status })
+                    .eq("id", orderId)
+            } else {
+                var { error } = await supabase
+                    .from("orders")
+                    .update({ status, provider_id: user?.id })
+                    .eq("id", orderId)
+            }
 
             if (error) throw error
-            console.log()
 
             setOrders(prevOrders =>
                 prevOrders.map(order =>
@@ -187,7 +193,6 @@ export function OrderProvider({ children }: { children: React.ReactNode }) {
                 .eq("order_id", orderId)
 
             if (itemsError) throw itemsError
-
             return { ...orderData, items: itemsData }
         } catch (err) {
             console.error("Error fetching order:", err)
@@ -239,6 +244,8 @@ export function OrderProvider({ children }: { children: React.ReactNode }) {
                 orders,
                 loading,
                 error,
+                loadOrders,
+                loadOrdersProvider,
                 createOrder,
                 updateOrderStatus,
                 getOrderById,

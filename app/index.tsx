@@ -5,8 +5,6 @@ import { View, Text, StyleSheet, Dimensions, Image } from "react-native"
 import { useRouter } from "expo-router"
 import { useAuth } from "../contexts/AuthContext"
 
-const { width, height } = Dimensions.get("window")
-
 export default function SplashScreen() {
   const router = useRouter()
   const { user, userType } = useAuth()
