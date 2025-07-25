@@ -39,7 +39,7 @@ export default function OrderDetailScreen() {
     const [updating, setUpdating] = useState(false)
 
     useEffect(() => {
-        const loadOrder = async () => {
+        const loadOrders = async () => {
             try {
                 const orderData = await getOrderById(id as string)
                 setOrder(orderData)
@@ -51,8 +51,8 @@ export default function OrderDetailScreen() {
             }
         }
 
-        loadOrder()
-    }, [id])
+        loadOrders()
+    }, [])
 
     const formatDate = (dateString?: string) => {
         if (!dateString) return "N/A"
@@ -169,11 +169,11 @@ export default function OrderDetailScreen() {
                     <View style={styles.customerInfo}>
                         <View style={styles.infoRow}>
                             <Ionicons name="person" size={20} color="#666" />
-                            <Text style={styles.infoText}>{order.provider?.name}</Text>
+                            <Text style={styles.infoText}>{order.provider.map((value: { name: string })=> value.name)}</Text>
                         </View>
                         <View style={styles.infoRow}>
                             <Ionicons name="call" size={20} color="#666" />
-                            <Text style={styles.infoText}>{order.provider?.phone}</Text>
+                            <Text style={styles.infoText}>{order.provider.map((value: { phone: string })=> value.phone)}</Text>
                         </View>
                        
                     </View>

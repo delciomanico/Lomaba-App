@@ -34,7 +34,7 @@ export default function ClientOrdersScreen() {
   )
 
   const renderOrder = ({ item }: { item: Order }) => (
-    <TouchableOpacity style={styles.orderCard} onPress={() => router.push(`/order/${item.id}`)}>
+    <TouchableOpacity style={styles.orderCard} onPress={() => router.push(`/(client)/order/${item.id}`)}>
       <View style={styles.orderHeader}>
         <Text style={styles.orderId}>Pedido #{item.id.slice(0,10)}</Text>
         <View style={[styles.statusBadge, { backgroundColor: statusColors[item.status] }]}>

@@ -145,7 +145,7 @@ export default function CartScreen() {
 
         <TextInput
           style={[styles.input, styles.addressInput]}
-          placeholder="Endereço de entrega completo"
+          placeholder="Rotulo do Endereço de entrega"
           value={deliveryAddress}
           onChangeText={setDeliveryAddress}
           multiline
