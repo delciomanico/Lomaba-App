@@ -20,6 +20,7 @@ export interface Order {
     latitude: number
     longitude: number
     provider_id: string | null
+    provider: any
     customer_id: string | null
     customer_name: string
     customer_phone: string

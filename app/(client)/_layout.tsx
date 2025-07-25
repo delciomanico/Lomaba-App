@@ -6,7 +6,6 @@ export default function ClientLayout() {
         <Stack.Screen name="(tabs)" />
         <Stack.Screen name="product/[id]" />
         <Stack.Screen name="cart" />
-        <Stack.Screen name="checkout" />
         <Stack.Screen name="order/[id]" />
       </Stack>
   )

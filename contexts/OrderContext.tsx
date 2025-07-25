@@ -14,7 +14,7 @@ export function OrderProvider({ children }: { children: React.ReactNode }) {
     useEffect(() => {
         loadOrdersProvider();
     }, []);
-    
+
 
     const loadOrders = async () => {
         setLoading(true)
@@ -34,13 +34,17 @@ export function OrderProvider({ children }: { children: React.ReactNode }) {
                         .from("order_items")
                         .select("*, product:products(*)")
                         .eq("order_id", order.id)
-
                     if (itemsError) throw itemsError
 
-                    return { ...order, items: itemsData }
+                    const { data: userData, error: userError } = await supabase
+                        .from("users")
+                        .select("*")
+                        .single()
+                    if (userError) throw userError
+                    return { ...order, items: itemsData, provider: userData }
                 })
             )
-
+            console.log(ordersWithItems)
             setOrders(ordersWithItems)
         } catch (err) {
             console.error("Error loading orders:", err)
@@ -196,7 +200,14 @@ export function OrderProvider({ children }: { children: React.ReactNode }) {
                 .eq("order_id", orderId)
 
             if (itemsError) throw itemsError
-            return { ...orderData, items: itemsData }
+
+            const { data: userData, error: userError } = await supabase
+                .from("users")
+                .select("*")
+                .single()
+            if (userError) throw userError
+
+            return { ...orderData, items: itemsData , provider: userData}
         } catch (err) {
             console.error("Error fetching order:", err)
             setError("Failed to fetch order")

@@ -7,6 +7,7 @@ import { useRouter, useLocalSearchParams } from "expo-router"
 import { useOrders } from "../../../contexts/OrderContext"
 import { useAuth } from "../../../contexts/AuthContext"
 import { useState, useEffect } from "react"
+import { Order } from "@/types/order"
 
 const DEFAULT_IMAGE = "https://via.placeholder.com/150"
 
@@ -26,33 +27,6 @@ const statusLabels = {
     delivering: "Em entrega",
     delivered: "Entregue",
     cancelled: "Cancelado",
-}
-
-interface OrderItem {
-    id: string
-    order_id: string
-    product_id: string
-    quantity: number
-    unit_price: number
-    product?: {
-        id: string
-        name: string
-        price: number
-        image_url: string
-    }
-}
-
-interface Order {
-    id: string
-    total_amount: number
-    status: "pending" | "confirmed" | "preparing" | "delivering" | "delivered" | "cancelled"
-    created_at: string
-    delivery_address: string
-    customer_name: string
-    customer_phone: string
-    estimated_delivery?: string
-    delivery_fee: number
-    items?: OrderItem[]
 }
 
 export default function OrderDetailScreen() {
@@ -188,6 +162,20 @@ export default function OrderDetailScreen() {
                             <Ionicons name="location" size={20} color="#666" />
                             <Text style={styles.infoText}>{order.delivery_address}</Text>
                         </View>
+                    </View>
+                </View>
+                 <View style={styles.section}>
+                    <Text style={styles.sectionTitle}>Informações do Entregador</Text>
+                    <View style={styles.customerInfo}>
+                        <View style={styles.infoRow}>
+                            <Ionicons name="person" size={20} color="#666" />
+                            <Text style={styles.infoText}>{order.provider?.name}</Text>
+                        </View>
+                        <View style={styles.infoRow}>
+                            <Ionicons name="call" size={20} color="#666" />
+                            <Text style={styles.infoText}>{order.provider?.phone}</Text>
+                        </View>
+                       
                     </View>
                 </View>
 
