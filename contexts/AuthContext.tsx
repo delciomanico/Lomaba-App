@@ -1,8 +1,6 @@
-"use client"
-
+import AsyncStorage from "@react-native-async-storage/async-storage"
 import type React from "react"
 import { createContext, useContext, useState, useEffect } from "react"
-import { supabase } from "../lib/supabase"
 
 interface User {
   id: string | undefined
@@ -25,6 +23,7 @@ type RegisterResult =
   | { success: true }
   | { success: false; error: string }
 
+const API_BASE_URL = "http://192.168.100.23:3333/api/v1"; // Substitua pela URL da sua API
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
 
@@ -34,10 +33,29 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    // Simulate checking for stored auth data
-    setTimeout(() => {
-      setLoading(false)
-    }, 1000)
+    // Verificar token armazenado (localStorage/AsyncStorage) ao inicializar
+    const checkAuth = async () => {
+      try {
+        // Aqui você pode verificar se há um token JWT armazenado
+        // e fazer uma requisição para validá-lo
+        // Exemplo simplificado:
+        // const token = await AsyncStorage.getItem('authToken');
+        // if (token) {
+        //   const response = await fetch(`${API_BASE_URL}/validate-token`, {...});
+        //   if (response.ok) {
+        //     const userData = await response.json();
+        //     setUser(userData);
+        //     setUserType(userData.type);
+        //   }
+        // }
+        setLoading(false)
+      } catch (error) {
+        console.error("Erro ao verificar autenticação:", error)
+        setLoading(false)
+      }
+    }
+
+    checkAuth()
   }, [])
 
   const login = async (
@@ -46,46 +64,35 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     type: 'client' | 'provider'
   ): Promise<RegisterResult> => {
     try {
-      // 1. Autentica no Supabase Auth
-      const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
-        email,
-        password
+      const response = await fetch(`${API_BASE_URL}/auth/login`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          email,
+          password,
+          user_type: type,
+        }),
       })
 
-      if (authError || !authData.user) {
-        throw authError || new Error('Falha ao autenticar.')
+      const data = await response.json()
+      if (!data.user) {
+        throw new Error(data.message || 'Falha ao autenticar.')
       }
 
-      const userId = authData.user.id
+      // Armazena o token (se necessário)
+     // await AsyncStorage.setItem('authToken', data.token);
 
-      // 2. Busca dados adicionais na tabela users
-      const { data: userData, error: userError } = await supabase
-        .from('users')
-        .select('user_type, user_id, email, phone, name')
-        .eq('user_id', userId)
-        .single()
-
-      if (userError || !userData) {
-        throw userError || new Error('Usuário não encontrado na tabela de metadados.')
+      const loggedInUser: User = {
+        id: data.user.id,
+        email: data.user.email,
+        name: data.user.name,
+        phone: data.user.phone,
+        type: data.user.userType
       }
 
-      // 3. Valida o tipo do usuário
-      if (userData.user_type !== type) {
-        // Opcional: deslogar usuário se tipo for inválido
-        await supabase.auth.signOut()
-        throw new Error('Usuário não autorizado: tipo inválido.')
-      }
-
-      // 4. Define usuário na aplicação
-      const mockUser: User = {
-        id: userData.user_id,
-        email: userData.email,
-        name: userData.name,
-        phone: userData.phone,
-        type: userData.user_type
-      }
-
-      setUser(mockUser)
+      setUser(loggedInUser)
       setUserType(type)
 
       return { success: true }
@@ -103,51 +110,31 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     type: "client" | "provider",
   ): Promise<RegisterResult> => {
     try {
-      const {
-        data: { session },
-        error,
-      } = await supabase.auth.signUp({
-        email,
-        password,
-        options: {
-          data: {
-            name,
-            phone,
-            user_type: type
-          }
-        }
+      const response = await fetch(`${API_BASE_URL}/auth/register`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          name,
+          email,
+          phone,
+          password,
+          user_type: type
+        }),
       })
 
+      const data = await response.json()
 
-      if (error) {
-        console.log("Erro no cadastro:", error.message)
-        return { success: false, error: error.message }
+      if (!data.ok) {
+        return { success: false, error: "Erro ao registrar usuário." }
       }
 
-      if (!session) {
-        console.log("Usuário não retornado. Talvez precise confirmar o e-mail.")
-        return { success: false, error: "Usuário não retornado. Confirme o e-mail." }
-      }
-      const userId  = session.user.id;
-
-      const { error: insertError } = await supabase.from('users').insert([
-        {
-          user_id: userId,
-          email,
-          name,
-          phone,
-          user_type: type
-        }
-      ])
-
-
-      if (insertError) {
-        await supabase.auth.admin.deleteUser(userId)
-        throw insertError
-      }
+      // Armazena o token (se necessário)
+      // await AsyncStorage.setItem('authToken', data.token);
 
       const newUser: User = {
-        id: userId,
+        id: data.user.id,
         email,
         name,
         phone,
@@ -165,9 +152,24 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   }
 
-  const logout = () => {
-    setUser(null)
-    setUserType(null)
+  const logout = async () => {
+    try {
+      // Opcional: chamar endpoint de logout na API
+      // await fetch(`${API_BASE_URL}/auth/logout`, {
+      //   method: 'POST',
+      //   headers: {
+      //     'Authorization': `Bearer ${await AsyncStorage.getItem('authToken')}`
+      //   }
+      // });
+
+      // Remove o token armazenado
+      // await AsyncStorage.removeItem('authToken');
+      
+      setUser(null)
+      setUserType(null)
+    } catch (error) {
+      console.error("Erro ao fazer logout:", error)
+    }
   }
 
   return (

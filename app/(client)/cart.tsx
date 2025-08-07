@@ -204,46 +204,182 @@ export default function CartScreen() {
 
   return (
     <SafeAreaView style={styles.container}>
-      <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"} style={styles.keyboardView}>
-        <View style={styles.header}>
-          <TouchableOpacity onPress={() => router.back()}>
-            <Ionicons name="arrow-back" size={24} color="#333" />
-          </TouchableOpacity>
-          <Text style={styles.title}>Carrinho ({cartItems.length})</Text>
-          <TouchableOpacity onPress={clearCart}>
-            <Text style={styles.clearText}>Limpar</Text>
-          </TouchableOpacity>
-        </View>
-        <FlatList
-          data={cartItems}
-          renderItem={renderCartItem}
-          ListHeaderComponent={checkComponent}
-          keyExtractor={(item) => item.id}
-          contentContainerStyle={styles.cartList}
-          showsVerticalScrollIndicator={false}
+  <KeyboardAvoidingView
+    behavior={Platform.OS === "ios" ? "padding" : "height"}
+    style={styles.keyboardView}
+    keyboardVerticalOffset={Platform.select({ ios: 60, android: 0 })}
+  >
+    {/* Cabeçalho Fixo */}
+    <View style={styles.header}>
+      <TouchableOpacity onPress={() => router.back()}>
+        <Ionicons name="arrow-back" size={24} color="#333" />
+      </TouchableOpacity>
+      <Text style={styles.title}>Carrinho ({cartItems.length})</Text>
+      <TouchableOpacity onPress={clearCart}>
+        <Text style={styles.clearText}>Limpar</Text>
+      </TouchableOpacity>
+    </View>
+
+    {/* Conteúdo Rolável */}
+    <ScrollView
+      contentContainerStyle={styles.scrollContainer}
+      keyboardShouldPersistTaps="handled"
+      keyboardDismissMode="interactive"
+    >
+      {/* Formulário de Entrega (parte superior) */}
+      <View style={styles.deliveryForm}>
+        <Text style={styles.formTitle}>Dados da Entrega</Text>
+        
+        <TextInput
+          style={styles.input}
+          placeholder="Nome completo"
+          value={customerName}
+          onChangeText={setCustomerName}
+          returnKeyType="next"
         />
-      </KeyboardAvoidingView>
-    </SafeAreaView>
+
+        <TextInput
+          style={styles.input}
+          placeholder="Telefone"
+          value={customerPhone}
+          onChangeText={setCustomerPhone}
+          keyboardType="phone-pad"
+          returnKeyType="next"
+        />
+
+        <TextInput
+          style={[styles.input, styles.addressInput]}
+          placeholder="Endereço de entrega"
+          value={deliveryAddress}
+          onChangeText={setDeliveryAddress}
+          multiline
+          numberOfLines={3}
+          placeholderTextColor="#aaa"
+          returnKeyType="done"
+        />
+      </View>
+
+      {/* Lista de Itens */}
+      {cartItems.map((item) => (
+        <View key={item.id} style={styles.cartItem}>
+          <Image source={{ uri: item.image_url }} style={styles.itemImage} />
+          <View style={styles.itemInfo}>
+            <Text style={styles.itemName}>{item.name}</Text>
+            <Text style={styles.itemPrice}>{item.price.toLocaleString("pt-AO")} Kz</Text>
+            <View style={styles.quantityContainer}>
+              <TouchableOpacity
+                style={styles.quantityButton}
+                onPress={() => handleQuantityChange(item.id, -1)}
+                disabled={item.quantity <= 1}
+              >
+                <Ionicons name="remove" size={16} color={item.quantity <= 1 ? "#CCC" : "#FF6B35"} />
+              </TouchableOpacity>
+              <Text style={styles.quantity}>{item.quantity}</Text>
+              <TouchableOpacity 
+                style={styles.quantityButton} 
+                onPress={() => handleQuantityChange(item.id, 1)}
+              >
+                <Ionicons name="add" size={16} color="#FF6B35" />
+              </TouchableOpacity>
+            </View>
+          </View>
+          <View style={styles.itemRight}>
+            <TouchableOpacity 
+              style={styles.removeButton} 
+              onPress={() => removeFromCart(item.id)}
+            >
+              <Ionicons name="trash-outline" size={20} color="#F44336" />
+            </TouchableOpacity>
+            <Text style={styles.itemTotal}>{(item.price * item.quantity).toLocaleString("pt-AO")} Kz</Text>
+          </View>
+        </View>
+      ))}
+
+      {/* Resumo do Pedido */}
+      <View style={styles.summary}>
+        <View style={styles.summaryRow}>
+          <Text style={styles.summaryLabel}>Subtotal</Text>
+          <Text style={styles.summaryValue}>{subtotal.toLocaleString("pt-AO")} Kz</Text>
+        </View>
+        <View style={styles.summaryRow}>
+          <Text style={styles.summaryLabel}>Taxa de entrega</Text>
+          <Text style={styles.summaryValue}>{deliveryFee.toLocaleString("pt-AO")} Kz</Text>
+        </View>
+        <View style={[styles.summaryRow, styles.totalRow]}>
+          <Text style={styles.totalLabel}>Total</Text>
+          <Text style={styles.totalValue}>{total.toLocaleString("pt-AO")} Kz</Text>
+        </View>
+      </View>
+    </ScrollView>
+
+    {/* Botão Fixo na Parte Inferior */}
+    <View style={styles.footer}>
+      <TouchableOpacity
+        style={[styles.checkoutButton, loading && styles.checkoutButtonDisabled]}
+        onPress={handleCheckout}
+        disabled={loading}
+      >
+        <Text style={styles.checkoutButtonText}>
+          {loading ? "Processando..." : "Finalizar Pedido"}
+        </Text>
+      </TouchableOpacity>
+    </View>
+  </KeyboardAvoidingView>
+</SafeAreaView>
   )
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "white",
+    backgroundColor: '#fff',
   },
   keyboardView: {
     flex: 1,
   },
-  header: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    paddingHorizontal: 20,
-    paddingVertical: 15,
-    borderBottomWidth: 1,
-    borderBottomColor: "#E5E5E5",
+  scrollContainer: {
+    paddingBottom: 100, // Espaço para o botão fixo
   },
+  header: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: 15,
+    borderBottomWidth: 1,
+    borderBottomColor: '#eee',
+  },
+  deliveryForm: {
+    padding: 15,
+  },
+  input: {
+    borderWidth: 1,
+    borderColor: '#ddd',
+    borderRadius: 8,
+    padding: 12,
+    marginBottom: 15,
+    fontSize: 16,
+  },
+  addressInput: {
+    height: 80,
+    textAlignVertical: 'top',
+  },
+  cartItem: {
+    flexDirection: 'row',
+    padding: 15,
+    borderBottomWidth: 1,
+    borderBottomColor: '#f5f5f5',
+  },
+  footer: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    padding: 15,
+    backgroundColor: '#fff',
+    borderTopWidth: 1,
+    borderTopColor: '#eee',
+  },
+ 
   title: {
     fontSize: 18,
     fontWeight: "bold",
@@ -257,18 +393,7 @@ const styles = StyleSheet.create({
   cartList: {
     padding: 20,
   },
-  cartItem: {
-    flexDirection: "row",
-    backgroundColor: "white",
-    borderRadius: 15,
-    padding: 15,
-    marginBottom: 15,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
-  },
+  
   itemImage: {
     width: 60,
     height: 60,
@@ -325,30 +450,13 @@ const styles = StyleSheet.create({
     backgroundColor: "#F8F9FA",
     paddingTop: 20,
   },
-  deliveryForm: {
-    paddingHorizontal: 20,
-    marginBottom: 20,
-  },
   formTitle: {
     fontSize: 18,
     fontWeight: "bold",
     color: "#333",
     marginBottom: 15,
   },
-  input: {
-    backgroundColor: "white",
-    paddingHorizontal: 15,
-    paddingVertical: 12,
-    borderRadius: 10,
-    fontSize: 16,
-    marginBottom: 15,
-    borderWidth: 1,
-    borderColor: "#E5E5E5",
-  },
-  addressInput: {
-    height: 80,
-    textAlignVertical: "top",
-  },
+
   summary: {
     backgroundColor: "white",
     paddingHorizontal: 20,

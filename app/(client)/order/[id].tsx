@@ -169,11 +169,11 @@ export default function OrderDetailScreen() {
                     <View style={styles.customerInfo}>
                         <View style={styles.infoRow}>
                             <Ionicons name="person" size={20} color="#666" />
-                            <Text style={styles.infoText}>{order.provider.map((value: { name: string })=> value.name)}</Text>
+                            <Text style={styles.infoText}>{order.provider && order.provider.map((value: { name: string })=> value.name)}</Text>
                         </View>
                         <View style={styles.infoRow}>
                             <Ionicons name="call" size={20} color="#666" />
-                            <Text style={styles.infoText}>{order.provider.map((value: { phone: string })=> value.phone)}</Text>
+                            <Text style={styles.infoText}>{order.provider && order.provider.map((value: { phone: string })=> value.phone)}</Text>
                         </View>
                        
                     </View>

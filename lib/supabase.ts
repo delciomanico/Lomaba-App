@@ -1,7 +1,7 @@
 import { AppState } from 'react-native'
 import { supabaseURL, supabaseKEY } from '../constants/supabase'
 import 'react-native-url-polyfill/auto'
-import AsyncStorage from '@react-native-async-storage/async-storage'
+/*import AsyncStorage from '@react-native-async-storage/async-storage'
 import { createClient, processLock } from '@supabase/supabase-js'
 
 const supabaseUrl = supabaseURL
@@ -28,4 +28,19 @@ AppState.addEventListener('change', (state) => {
   } else {
     supabase.auth.stopAutoRefresh()
   }
+})*/
+
+import AsyncStorage from '@react-native-async-storage/async-storage'
+import { createClient } from '@supabase/supabase-js'
+
+const supabaseUrl = "https://owlgrztiygghkaxjitwn.supabase.co"
+const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im93bGdyenRpeWdnaGtheGppdHduIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc1MTA2MDY2MiwiZXhwIjoyMDY2NjM2NjYyfQ.zYBB31uePdnhWFK0Gh7BbwOcc5ZlrS5z87eDp8FE7NQ'
+
+export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
+  auth: {
+    storage: AsyncStorage,
+    autoRefreshToken: true,
+    persistSession: true,
+    detectSessionInUrl: false,
+  },
 })

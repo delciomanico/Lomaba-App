@@ -1,15 +1,29 @@
 {
   "build": {
+    "development": {
+      "developmentClient": true, 
+      "distribution": "internal", 
+      "android": {
+        "buildType": "apk",     
+        "gradleCommand": ":app:assembleDebug" 
+      },
+      "ios": {
+        "simulator": true       
+      },
+      "channel": "development"   
+    },
     "preview": {
       "android": {
         "buildType": "apk"
-      }
+      },
+      "channel": "preview"
     },
     "production": {
       "android": {
         "buildType": "apk",
         "gradleCommand": ":app:assembleRelease"
-      }
+      },
+      "channel": "production"
     }
   }
 }

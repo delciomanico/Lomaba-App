@@ -120,19 +120,6 @@ export default function ProviderDashboardScreen() {
           ))}
         </View>
 
-        {/* Quick Actions */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Ações Rápidas</Text>
-          <View style={styles.actionsContainer}>
-            {quickActions.map((action, index) => (
-              <TouchableOpacity key={index} style={styles.actionButton} onPress={action.onPress}>
-                <Ionicons name={action.icon as any} size={24} color={action.color} />
-                <Text style={styles.actionText}>{action.title}</Text>
-              </TouchableOpacity>
-            ))}
-          </View>
-        </View>
-
         {/* Recent Orders */}
         <View style={styles.section}>
           <View style={styles.sectionHeader}>

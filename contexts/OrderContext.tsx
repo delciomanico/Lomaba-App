@@ -37,13 +37,8 @@ export function OrderProvider({ children }: { children: React.ReactNode }) {
                         .eq("order_id", order.id)
                     if (itemsError) throw itemsError
 
-                    const { data: userData, error: userError } = await supabase
-                        .from("users")
-                        .select("*")
-                        .eq('user_id', order.provider_id)
-                        .maybeSingle()
-                    if (userError) throw userError
-                    return { ...order, items: itemsData, provider: userData }
+                   
+                    return { ...order, items: itemsData }
                 })
             )
             setOrders(ordersWithItems)
@@ -201,13 +196,13 @@ export function OrderProvider({ children }: { children: React.ReactNode }) {
                 .eq("order_id", orderId)
 
             if (itemsError) throw itemsError
-
-            const { data: userData, error: userError } = await supabase
+      
+            var { data: userData, error: userError } = await supabase
                 .from("users")
                 .select("*")
                 .eq("user_id", orderData.provider_id)
+             
             
-            if (userError) throw userError
             return { ...orderData, items: itemsData, provider: userData }
         } catch (err) {
             console.error("Error fetching order:", err)

@@ -22,6 +22,7 @@
       "edgeToEdgeEnabled": true,
       "package": "com.delciomanico.lomba_app_v1",
       "permissions": [
+        "ACCESS_FINE_LOCATION",
         "ACCESS_FINE_LOCATION"
       ]
     },
@@ -51,6 +52,12 @@
         "projectId": "3d7d5577-2cfc-43e3-a126-b20c5881a953"
       }
     },
-    "owner": "delciomanico"
+    "owner": "delciomanico",
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
+    "updates": {
+      "url": "https://u.expo.dev/3d7d5577-2cfc-43e3-a126-b20c5881a953"
+    }
   }
 }

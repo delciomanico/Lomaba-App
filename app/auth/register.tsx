@@ -96,14 +96,6 @@ export default function RegisterScreen() {
               >
                 <Text style={[styles.userTypeText, userType === "client" && styles.userTypeTextActive]}>Cliente</Text>
               </TouchableOpacity>
-              <TouchableOpacity
-                style={[styles.userTypeButton, userType === "provider" && styles.userTypeButtonActive]}
-                onPress={() => setUserType("provider")}
-              >
-                <Text style={[styles.userTypeText, userType === "provider" && styles.userTypeTextActive]}>
-                  Fornecedor
-                </Text>
-              </TouchableOpacity>
             </View>
 
             <View style={styles.form}>

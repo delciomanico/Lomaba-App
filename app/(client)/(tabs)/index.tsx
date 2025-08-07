@@ -7,7 +7,7 @@ import { Ionicons } from "@expo/vector-icons"
 import { useRouter } from "expo-router"
 import { useCart } from "../../../contexts/CartContext"
 import { useProductContext } from "../../../contexts/ProductContext"
-import {useOrders} from "@/contexts/OrderContext"
+import { useOrders } from "@/contexts/OrderContext"
 import * as Location from 'expo-location'
 import { FloatingRefreshButton } from "@/components/buttons/ButtonFloating"
 
@@ -87,9 +87,9 @@ export default function ClientHomeScreen() {
   const { products, fetchProductsNearby } = useProductContext()
   const { loadOrders } = useOrders()
 
-  useEffect(()=>{
-      loadOrders();
-  },[]);
+  useEffect(() => {
+    loadOrders();
+  }, []);
 
   useEffect(() => {
     (async () => {
@@ -179,16 +179,25 @@ export default function ClientHomeScreen() {
       />
 
       {/* Products */}
-      <FlatList
-        data={filteredProducts}
-        renderItem={renderProduct}
-        keyExtractor={(item) => item.id}
-        numColumns={2}
-        contentContainerStyle={styles.productsContainer}
-        columnWrapperStyle={styles.productRow}
-        showsVerticalScrollIndicator={false}
-      />
-      <FloatingRefreshButton onRefresh={loadOrders}/>
+      {filteredProducts.length == 0 ? (
+        <View style={styles.emptyState}>
+          <Ionicons name="receipt-outline" size={80} color="#CCC" />
+          <Text style={styles.emptyTitle}>Zona de entrega invalida</Text>
+          <Text style={styles.emptySubtitle}>Quando disponivel os produtos aparecerão aqui.</Text>
+        </View>
+      ) : (
+        <FlatList
+          data={filteredProducts}
+          renderItem={renderProduct}
+          keyExtractor={(item) => item.id}
+          numColumns={2}
+          contentContainerStyle={styles.productsContainer}
+          columnWrapperStyle={styles.productRow}
+          showsVerticalScrollIndicator={false}
+        />
+      )
+      }
+      <FloatingRefreshButton onRefresh={loadOrders} />
     </SafeAreaView>
   )
 }
@@ -252,7 +261,7 @@ const styles = StyleSheet.create({
   },
   categoriesContainer: {
     paddingHorizontal: 20,
-    marginBottom: 20,
+    marginBottom: 0,
   },
   categoryButton: {
     flexDirection: "row",
@@ -326,5 +335,23 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     alignSelf: "flex-end",
+  },
+  emptyState: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    paddingHorizontal: 40,
+  },
+  emptyTitle: {
+    fontSize: 20,
+    fontWeight: "bold",
+    color: "#333",
+    marginTop: 20,
+    marginBottom: 10,
+  },
+  emptySubtitle: {
+    fontSize: 16,
+    color: "#666",
+    textAlign: "center",
   },
 })
