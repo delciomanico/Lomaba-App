@@ -39,8 +39,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         // Aqui você pode verificar se há um token JWT armazenado
         // e fazer uma requisição para validá-lo
         // Exemplo simplificado:
-        // const token = await AsyncStorage.getItem('authToken');
-        // if (token) {
+        const token = await AsyncStorage.getItem('authToken');
+        //if (token) {
         //   const response = await fetch(`${API_BASE_URL}/validate-token`, {...});
         //   if (response.ok) {
         //     const userData = await response.json();
@@ -82,7 +82,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
 
       // Armazena o token (se necessário)
-     // await AsyncStorage.setItem('authToken', data.token);
+     await AsyncStorage.setItem('authToken', data.token);
 
       const loggedInUser: User = {
         id: data.user.id,

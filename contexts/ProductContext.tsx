@@ -1,5 +1,5 @@
+import AsyncStorage from '@react-native-async-storage/async-storage'
 import React, { createContext, useContext, useState, useEffect } from 'react'
-import { supabase } from '../lib/supabase' // ajuste o path conforme seu projeto
 
 type UserType = 'client' | 'provider'
 
@@ -57,81 +57,108 @@ interface ProductContextProps {
     fetchProductsNearby: (lat: number, lng: number) => Promise<void>
     isUserWithinZone: (lat: number, lng: number, zonaId: string) => Promise<boolean>
     createOrder: (order: OrderInput) => Promise<any>
+    loading: boolean
+    error: string | null
 }
+
+const API_BASE_URL = "http://192.168.100.23:3333/api/v1"; // Substitua pela URL da sua API
 
 const ProductContext = createContext<ProductContextProps | undefined>(undefined)
 
 export const ProductProvider = ({ children }: { children: React.ReactNode }) => {
     const [products, setProducts] = useState<Product[]>([])
     const [zonas, setZonas] = useState<Zona[]>([])
+    const [loading, setLoading] = useState(false)
+    const [error, setError] = useState<string | null>(null)
+
+    const fetchWithAuth = async (url: string, options: RequestInit = {}) => {
+        try {
+            setLoading(true)
+            setError(null)
+            // Obter token de autenticação (exemplo usando AsyncStorage)
+            const token = await AsyncStorage.getItem('authToken');
+            //const token = "seu-token-aqui"; // Substitua pela lógica real
+            
+            const response = await fetch(`${API_BASE_URL}${url}`, {
+                ...options,
+                headers: {
+                    ...options.headers,
+                    'Content-Type': 'application/json',
+                    'authorization': `Bearer ${token}`
+                }
+            });
+
+            if (!response.ok) {
+                throw new Error(await response.text())
+            }
+
+            return await response.json()
+        } catch (err) {
+            console.error("API request failed:", err)
+            setError(err instanceof Error ? err.message : 'Erro desconhecido')
+            throw err
+        } finally {
+            setLoading(false)
+        }
+    };
 
     const fetchProductsNearby = async (lat: number, lng: number) => {
-
-        const { data, error } = await supabase.rpc('get_products_nearby', {
-            user_lat: lat,
-            user_lng: lng,
-        })
-
-        if (error) {
-            console.error('Erro ao buscar produtos próximos:', error)
-            return
+        try {
+            const data = await fetchWithAuth(`/products/nearby?lat=${lat}&lng=${lng}`)
+            setProducts(data)
+        } catch (err) {
+            console.error('Erro ao buscar produtos próximos:', err)
+            throw err
         }
-        setProducts(data)
     }
 
     const isUserWithinZone = async (lat: number, lng: number, zonaId: string): Promise<boolean> => {
-        const { data, error } = await supabase.rpc('is_within_zone', {
-            user_lat: lat,
-            user_lng: lng,
-            zone_id: zonaId,
-        })
-        if (error) {
-            console.error('Erro ao verificar zona:', error)
+        try {
+            const data = await fetchWithAuth(`/zones/${zonaId}/contains?lat=${lat}&lng=${lng}`)
+            return data.isWithin
+        } catch (err) {
+            console.error('Erro ao verificar zona:', err)
             return false
         }
-        return data
     }
 
     const createOrder = async (order: OrderInput) => {
-        const { customerId, providerId, items, deliveryAddress, deliveryFee, customerName, customerPhone } = order
-        const totalAmount = items.reduce((sum, item) => sum + item.unit_price * item.quantity, 0)
+        try {
+            const { customerId, providerId, items, deliveryAddress, deliveryFee, customerName, customerPhone } = order
+            
+            const orderData = await fetchWithAuth('/orders', {
+                method: 'POST',
+                body: JSON.stringify({
+                    customerId,
+                    providerId,
+                    items,
+                    deliveryAddress,
+                    deliveryFee,
+                    customerName,
+                    customerPhone
+                })
+            })
 
-        const { data: orderData, error: orderError } = await supabase
-            .from('orders')
-            .insert([{
-                customer_id: customerId,
-                provider_id: providerId,
-                status: 'pending',
-                total_amount: totalAmount,
-                delivery_fee: deliveryFee,
-                delivery_address: deliveryAddress,
-                customer_name: customerName,
-                customer_phone: customerPhone,
-            }])
-            .select()
-            .single()
-
-        if (orderError) {
-            console.error('Erro ao criar pedido:', orderError)
-            throw orderError
+            return orderData
+        } catch (err) {
+            console.error('Erro ao criar pedido:', err)
+            throw err
         }
-
-        const itemsToInsert = items.map(item => ({
-            order_id: orderData.id,
-            product_id: item.product_id,
-            quantity: item.quantity,
-            unit_price: item.unit_price,
-            total_price: item.quantity * item.unit_price
-        }))
-
-        const { error: itemsError } = await supabase.from('order_items').insert(itemsToInsert)
-        if (itemsError) {
-            console.error('Erro ao inserir itens:', itemsError)
-            throw itemsError
-        }
-
-        return orderData
     }
+
+    // Carregar zonas ao iniciar
+    useEffect(() => {
+        const loadZonas = async () => {
+            try {
+                const data = await fetchWithAuth('/zones')
+                setZonas(data)
+            } catch (err) {
+                console.error('Erro ao carregar zonas:', err)
+            }
+        }
+        
+        loadZonas()
+    }, [])
 
     return (
         <ProductContext.Provider value={{
@@ -140,6 +167,8 @@ export const ProductProvider = ({ children }: { children: React.ReactNode }) => 
             fetchProductsNearby,
             isUserWithinZone,
             createOrder,
+            loading,
+            error
         }}>
             {children}
         </ProductContext.Provider>
