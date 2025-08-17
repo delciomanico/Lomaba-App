@@ -52,6 +52,7 @@ export function OrderProvider({ children }: { children: React.ReactNode }) {
         setError(null)
         try {
             const data = await fetchWithAuth(`/orders`);
+            
             setOrders(data);
         } catch (err: any) {
             console.error("Error loading orders:", err)
@@ -95,11 +96,11 @@ export function OrderProvider({ children }: { children: React.ReactNode }) {
                 body: JSON.stringify({
                     items,
                     total_amount,
-                    delivery_address: deliveryAddress,
+                    deliveryAddress,
                     latitude,
                     longitude,
-                    customer_name: customerName,
-                    customer_phone: customerPhone,
+                    customerName,
+                    customerPhone,
                     delivery_fee: deliveryFee
                 })
             });
@@ -111,7 +112,7 @@ export function OrderProvider({ children }: { children: React.ReactNode }) {
                 await loadOrders();
             }
 
-            return orderData.id.toString();
+            return orderData.id;
         } catch (err: any) {
             console.error("Error creating order:", err)
             setError(err.message || "Failed to create order")
@@ -148,6 +149,7 @@ export function OrderProvider({ children }: { children: React.ReactNode }) {
         setError(null)
         try {
             const order = await fetchWithAuth(`/orders/${orderId}`);
+            
             return order;
         } catch (err: any) {
             console.error("Error fetching order:", err)

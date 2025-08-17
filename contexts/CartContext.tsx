@@ -18,6 +18,7 @@ interface Product {
 }
 
 interface CartItem extends Product {
+  imageUrl: string | undefined
   quantity: number
 }
 

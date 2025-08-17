@@ -129,8 +129,7 @@ export default function ProductDetailScreen() {
       fetchProductsNearby(latitude, longitude)
     })()
   }, [])
-  const product = products.find((p) => p.id === id)
-
+  const product = products.find((p) => p.id == id)
   if (!product) {
     return (
       <SafeAreaView style={styles.container}>
@@ -181,7 +180,7 @@ export default function ProductDetailScreen() {
       </View>
 
       <ScrollView showsVerticalScrollIndicator={false}>
-        <Image source={{ uri: product.image_url }} style={styles.productImage} />
+        <Image source={{ uri: product.imageUrl }} style={styles.productImage} />
 
         <View style={styles.content}>
           <View style={styles.productHeader}>

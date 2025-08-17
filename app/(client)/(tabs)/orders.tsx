@@ -36,7 +36,7 @@ export default function ClientOrdersScreen() {
   const renderOrder = ({ item }: { item: Order }) => (
     <TouchableOpacity style={styles.orderCard} onPress={() => router.push(`/(client)/order/${item.id}`)}>
       <View style={styles.orderHeader}>
-        <Text style={styles.orderId}>Pedido #{item.id.slice(0,10)}</Text>
+        <Text style={styles.orderId}>Pedido #{item.id}</Text>
         <View style={[styles.statusBadge, { backgroundColor: statusColors[item.status] }]}>
           <Text style={styles.statusText}>{statusLabels[item.status]}</Text>
         </View>
@@ -45,7 +45,7 @@ export default function ClientOrdersScreen() {
       <View style={styles.orderItems}>
         {item.items.slice(0, 2).map((orderItem: OrderItem, index: number) => (
           <View key={index} style={styles.orderItem}>
-            <Image source={{ uri: orderItem.product.image_url }} style={styles.itemImage} />
+            <Image source={{ uri: orderItem.product.imageUrl }} style={styles.itemImage} />
             <View style={styles.itemInfo}>
               <Text style={styles.itemName}>{orderItem.product.name}</Text>
               <Text style={styles.itemQuantity}>Qtd: {orderItem.quantity}</Text>
@@ -56,8 +56,8 @@ export default function ClientOrdersScreen() {
       </View>
 
       <View style={styles.orderFooter}>
-        <Text style={styles.orderTotal}>Total: {item.total_amount.toLocaleString("pt-AO")} Kz</Text>
-        <Text style={styles.orderDate}>{ new Date(item.created_at).toLocaleDateString("pt-AO")}</Text>
+        <Text style={styles.orderTotal}>Total: {item.totalAmount.toLocaleString("pt-AO")} Kz</Text>
+        <Text style={styles.orderDate}>{ new Date(item.createdAt).toLocaleDateString("pt-AO")}</Text>
       </View>
 
       {item.estimated_delivery && item.status === "delivering" && (

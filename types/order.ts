@@ -1,4 +1,5 @@
 export interface OrderItem {
+    unitPrice: any;
     price: any;
     id: string;
     order_id: string;
@@ -12,6 +13,13 @@ export interface OrderItem {
 export type OrderStatus = "pending" | "confirmed" | "preparing" | "delivering" | "delivered" | "cancelled"
 
 export interface Order {
+    deliveryAddress: ReactNode;
+    customerPhone: ReactNode;
+    customerName: ReactNode;
+    deliveryFrete: any;
+    deliveryFee: any;
+    createdAt: string | number | Date;
+    totalAmount: any;
     id: string
     total_amount: number
     status: OrderStatus

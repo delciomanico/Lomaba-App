@@ -22,6 +22,7 @@ interface Zona {
 }
 
 interface Product {
+    imageUrl: string | undefined
     category: string
     id: string
     name: string

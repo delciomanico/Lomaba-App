@@ -131,7 +131,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
 
       // Armazena o token (se necessário)
-      // await AsyncStorage.setItem('authToken', data.token);
+      await AsyncStorage.setItem('authToken', data.token);
 
       const newUser: User = {
         id: data.user.id,

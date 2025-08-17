@@ -91,18 +91,19 @@ export default function ClientHomeScreen() {
     loadOrders();
   }, []);
 
-  useEffect(() => {
-    (async () => {
-      const { status } = await Location.requestForegroundPermissionsAsync()
-      if (status !== 'granted') {
-        console.warn('Permissão de localização negada')
-        return
-      }
+  async function getProductFresh() {
+    const { status } = await Location.requestForegroundPermissionsAsync()
+    if (status !== 'granted') {
+      console.warn('Permissão de localização negada')
+      return
+    }
 
-      const location = await Location.getCurrentPositionAsync({})
-      const { latitude, longitude } = location.coords
-      fetchProductsNearby(latitude, longitude)
-    })()
+    const location = await Location.getCurrentPositionAsync({})
+    const { latitude, longitude } = location.coords
+    fetchProductsNearby(latitude, longitude);
+  }
+  useEffect(() => {
+    getProductFresh();
   }, [])
 
 
@@ -116,7 +117,7 @@ export default function ClientHomeScreen() {
 
   const renderProduct = ({ item }: { item: (typeof products)[0] }) => (
     <TouchableOpacity style={styles.productCard} onPress={() => router.push(`/product/${item.id}`)}>
-      <Image source={{ uri: item.image_url }} style={styles.productImage} />
+      <Image source={{ uri: item.imageUrl }} style={styles.productImage} />
       <View style={styles.productInfo}>
         <Text style={styles.productName} numberOfLines={2}>
           {item.name}
@@ -197,7 +198,7 @@ export default function ClientHomeScreen() {
         />
       )
       }
-      <FloatingRefreshButton onRefresh={loadOrders} />
+      <FloatingRefreshButton onRefresh={getProductFresh} />
     </SafeAreaView>
   )
 }

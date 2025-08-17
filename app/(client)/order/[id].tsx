@@ -123,7 +123,7 @@ export default function OrderDetailScreen() {
                 <TouchableOpacity onPress={() => router.back()}>
                     <Ionicons name="arrow-back" size={24} color="#333" />
                 </TouchableOpacity>
-                <Text style={styles.title}>Pedido #{order.id.slice(0, 10)}</Text>
+                <Text style={styles.title}>Pedido #{order.id}</Text>
                 <View style={{ width: 24 }} />
             </View>
 
@@ -152,7 +152,7 @@ export default function OrderDetailScreen() {
                     <View style={styles.customerInfo}>
                         <View style={styles.infoRow}>
                             <Ionicons name="person" size={20} color="#666" />
-                            <Text style={styles.infoText}>{order.customer_name}</Text>
+                            <Text style={styles.infoText}>{order.customerName}</Text>
                         </View>
                         <View style={styles.infoRow}>
                             <Ionicons name="call" size={20} color="#666" />
@@ -191,10 +191,10 @@ export default function OrderDetailScreen() {
                                 />
                                 <View style={styles.itemInfo}>
                                     <Text style={styles.itemName}>{item.product?.name || "Produto não encontrado"}</Text>
-                                    <Text style={styles.itemPrice}>{item.unit_price.toLocaleString("pt-AO")} Kz</Text>
+                                    <Text style={styles.itemPrice}>{item.unitPrice.toLocaleString("pt-AO")} Kz</Text>
                                     <Text style={styles.itemQuantity}>Quantidade: {item.quantity}</Text>
                                 </View>
-                                <Text style={styles.itemTotal}>{(item.unit_price * item.quantity).toLocaleString("pt-AO")} Kz</Text>
+                                <Text style={styles.itemTotal}>{(item.unitPrice * item.quantity).toLocaleString("pt-AO")} Kz</Text>
                             </View>
                         ))}
                     </View>
@@ -212,11 +212,11 @@ export default function OrderDetailScreen() {
                         </View>
                         <View style={styles.summaryRow}>
                             <Text style={styles.summaryLabel}>Taxa de entrega</Text>
-                            <Text style={styles.summaryValue}>{order.delivery_fee.toLocaleString("pt-AO")} Kz</Text>
+                            <Text style={styles.summaryValue}>{order.deliveryFee} Kz</Text>
                         </View>
                         <View style={[styles.summaryRow, styles.totalRow]}>
                             <Text style={styles.totalLabel}>Total</Text>
-                            <Text style={styles.totalValue}>{order.total_amount.toLocaleString("pt-AO")} Kz</Text>
+                            <Text style={styles.totalValue}>{order.totalAmount} Kz</Text>
                         </View>
                     </View>
                 </View>
