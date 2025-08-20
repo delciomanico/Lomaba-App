@@ -106,7 +106,7 @@ export default function OrderDetailScreen() {
         <TouchableOpacity onPress={() => router.back()}>
           <Ionicons name="arrow-back" size={24} color="#333" />
         </TouchableOpacity>
-        <Text style={styles.title}>Pedido #{order.id.slice(0,10)}</Text>
+        <Text style={styles.title}>Pedido #{order.id}</Text>
         <View style={{ width: 24 }} />
       </View>
 
@@ -117,8 +117,8 @@ export default function OrderDetailScreen() {
             <Text style={styles.statusText}>{statusLabels[order.status]}</Text>
           </View>
           <Text style={styles.orderDate}>
-            Pedido realizado em {new Date(order.created_at).toLocaleDateString("pt-AO")} às{" "}
-            {new Date(order.created_at).toLocaleTimeString("pt-AO", {
+            Pedido realizado em {new Date(order.createdAt).toLocaleDateString("pt-AO")} às{" "}
+            {new Date(order.createdAt).toLocaleTimeString("pt-AO", {
               hour: "2-digit",
               minute: "2-digit",
             })}
@@ -143,15 +143,15 @@ export default function OrderDetailScreen() {
           <View style={styles.customerInfo}>
             <View style={styles.infoRow}>
               <Ionicons name="person" size={20} color="#666" />
-              <Text style={styles.infoText}>{order.customer_name}</Text>
+              <Text style={styles.infoText}>{order.customerName}</Text>
             </View>
             <View style={styles.infoRow}>
               <Ionicons name="call" size={20} color="#666" />
-              <Text style={styles.infoText}>{order.customer_phone}</Text>
+              <Text style={styles.infoText}>{order.customerPhone}</Text>
             </View>
-            <TouchableOpacity style={styles.infoRow} onPress={()=> openGoogleMaps(order.latitude, order.longitude, order.delivery_address)}>
+            <TouchableOpacity style={styles.infoRow} onPress={()=> openGoogleMaps(order.latitude, order.longitude, order.deliveryAddress)}>
               <Ionicons name="location" size={40} color="#666" />
-              <Text style={styles.infoText}>{order.delivery_address}</Text>
+              <Text style={styles.infoText}>{order.deliveryAddress}</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -165,10 +165,10 @@ export default function OrderDetailScreen() {
                 <Image source={{ uri: item.product.image_url }} style={styles.itemImage} />
                 <View style={styles.itemInfo}>
                   <Text style={styles.itemName}>{item.product.name}</Text>
-                  <Text style={styles.itemPrice}>{item.unit_price.toLocaleString("pt-AO")} Kz</Text>
+                  <Text style={styles.itemPrice}>{item.unitPrice.toLocaleString("pt-AO")} Kz</Text>
                   <Text style={styles.itemQuantity}>Quantidade: {item.quantity}</Text>
                 </View>
-                <Text style={styles.itemTotal}>{(item.unit_price * item.quantity).toLocaleString("pt-AO")} Kz</Text>
+                <Text style={styles.itemTotal}>{(item.unitPrice * item.quantity).toLocaleString("pt-AO")} Kz</Text>
               </View>
             ))}
           </View>
@@ -180,15 +180,15 @@ export default function OrderDetailScreen() {
           <View style={styles.summary}>
             <View style={styles.summaryRow}>
               <Text style={styles.summaryLabel}>Subtotal</Text>
-              <Text style={styles.summaryValue}>{(order.total_amount - order.delivery_fee).toLocaleString("pt-AO")} Kz</Text>
+              <Text style={styles.summaryValue}>{(order.totalAmount - order.deliveryFee).toLocaleString("pt-AO")} Kz</Text>
             </View>
             <View style={styles.summaryRow}>
               <Text style={styles.summaryLabel}>Taxa de entrega</Text>
-              <Text style={styles.summaryValue}>{order.delivery_fee.toLocaleString("pt-AO")} Kz</Text>
+              <Text style={styles.summaryValue}>{order.deliveryFee.toLocaleString("pt-AO")} Kz</Text>
             </View>
             <View style={[styles.summaryRow, styles.totalRow]}>
               <Text style={styles.totalLabel}>Total</Text>
-              <Text style={styles.totalValue}>{order.total_amount.toLocaleString("pt-AO")} Kz</Text>
+              <Text style={styles.totalValue}>{order.totalAmount.toLocaleString("pt-AO")} Kz</Text>
             </View>
           </View>
         </View>

@@ -82,7 +82,7 @@ export default function CartScreen() {
       Alert.alert("Pedido Realizado!", "Seu pedido foi enviado com sucesso!", [
         {
           text: "Ver Pedido",
-          onPress: () => router.replace(`/(client)/order/${orderId}`),
+          onPress: () => router.replace(`/(client)/(tabs)/orders`),
         },
       ])
     } catch (error) {

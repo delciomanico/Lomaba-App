@@ -3,7 +3,7 @@ import { useAuth } from "./AuthContext";
 import { Order, OrderContextType, OrderItem, OrderStatus } from "@/types/order";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
-const API_BASE_URL = "http://192.168.100.23:3333/api/v1"; // Substitua pela URL da sua API
+const API_BASE_URL = "http://192.168.100.23:3333/api/v1";
 
 const OrderContext = createContext<OrderContextType | undefined>(undefined)
 
@@ -149,7 +149,6 @@ export function OrderProvider({ children }: { children: React.ReactNode }) {
         setError(null)
         try {
             const order = await fetchWithAuth(`/orders/${orderId}`);
-            
             return order;
         } catch (err: any) {
             console.error("Error fetching order:", err)

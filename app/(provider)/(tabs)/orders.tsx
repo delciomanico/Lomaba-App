@@ -79,9 +79,9 @@ export default function ProviderOrdersScreen() {
     <TouchableOpacity style={styles.orderCard} onPress={() => router.push(`/(provider)/order/${item.id}`)}>
       <View style={styles.orderHeader}>
         <View>
-          <Text style={styles.orderId}>Pedido #{item.id.slice(0,10)}</Text>
-          <Text style={styles.customerName}>{item.customer_name}</Text>
-          <Text style={styles.customerPhone}>{item.customer_phone} </Text>
+          <Text style={styles.orderId}>Pedido #{item.id}</Text>
+          <Text style={styles.customerName}>{item.customerName}</Text>
+          <Text style={styles.customerPhone}>{item.customerPhone} </Text>
         </View>
         <View style={[styles.statusBadge, { backgroundColor: statusColors[item.status] }]}>
           <Text style={styles.statusText}>{statusLabels[item.status]}</Text>
@@ -91,9 +91,9 @@ export default function ProviderOrdersScreen() {
       <View style={styles.orderItems}>
         {item.items.slice(0, 2).map((orderItem: any, index: number) => (
           <View key={index} style={styles.orderItem}>
-            <Image source={{ uri: orderItem.product.image_url }} style={styles.itemImage} />
+            <Image source={{ uri: orderItem.product.imageUrl }} style={styles.itemImage} />
             <View style={styles.itemInfo}>
-              <Text style={styles.itemName}>{orderItem.name}</Text>
+              <Text style={styles.itemName}>{orderItem.product.name}</Text>
               <Text style={styles.itemQuantity}>Qtd: {orderItem.quantity}</Text>
             </View>
           </View>
@@ -104,14 +104,14 @@ export default function ProviderOrdersScreen() {
       <View style={styles.deliveryInfo}>
         <Ionicons name="location" size={16} color="#666" />
         <Text style={styles.deliveryAddress} numberOfLines={2}>
-          {item.delivery_address}
+          {item.deliveryAddress}
         </Text>
       </View>
 
       <View style={styles.orderFooter}>
-        <Text style={styles.orderTotal}>Total: {item.total_amount.toLocaleString("pt-AO")} Kz</Text>
+        <Text style={styles.orderTotal}>Total: {item.totalAmount.toLocaleString("pt-AO")} Kz</Text>
         <Text style={styles.orderTime}>
-          {new Date(item.estimated_delivery).toLocaleTimeString("pt-AO",{
+          {new Date(item.estimatedDelivery).toLocaleTimeString("pt-AO",{
             hour: "2-digit",
             minute: "2-digit",
           })}

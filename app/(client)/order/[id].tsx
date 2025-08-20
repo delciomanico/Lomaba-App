@@ -54,7 +54,7 @@ export default function OrderDetailScreen() {
         loadOrders()
     }, [])
 
-    const formatDate = (dateString?: string) => {
+    const formatDate = (dateString?: string | number | Date) => {
         if (!dateString) return "N/A"
         const date = new Date(dateString)
         return date.toLocaleDateString("pt-AO", {
@@ -64,7 +64,7 @@ export default function OrderDetailScreen() {
         })
     }
 
-    const formatTime = (dateString?: string) => {
+    const formatTime = (dateString?: string | number | Date) => {
         if (!dateString) return "N/A"
         const date = new Date(dateString)
         return date.toLocaleTimeString("pt-AO", {
@@ -134,7 +134,7 @@ export default function OrderDetailScreen() {
                         <Text style={styles.statusText}>{statusLabels[order.status]}</Text>
                     </View>
                     <Text style={styles.orderDate}>
-                        Pedido realizado em {formatDate(order.created_at)} às {formatTime(order.created_at)}
+                        Pedido realizado em {formatDate(order.createdAt)} às {formatTime(order.createdAt)}
                     </Text>
                     {order.estimated_delivery && order.status === "delivering" && (
                         <View style={styles.deliveryEstimate}>
@@ -156,11 +156,11 @@ export default function OrderDetailScreen() {
                         </View>
                         <View style={styles.infoRow}>
                             <Ionicons name="call" size={20} color="#666" />
-                            <Text style={styles.infoText}>{order.customer_phone}</Text>
+                            <Text style={styles.infoText}>{order.customerPhone}</Text>
                         </View>
                         <View style={styles.infoRow}>
                             <Ionicons name="location" size={20} color="#666" />
-                            <Text style={styles.infoText}>{order.delivery_address}</Text>
+                            <Text style={styles.infoText}>{order.deliveryAddress}</Text>
                         </View>
                     </View>
                 </View>
@@ -207,7 +207,7 @@ export default function OrderDetailScreen() {
                         <View style={styles.summaryRow}>
                             <Text style={styles.summaryLabel}>Subtotal</Text>
                             <Text style={styles.summaryValue}>
-                                {(order.total_amount - order.delivery_fee).toLocaleString("pt-AO")} Kz
+                                {(order.totalAmount - order.deliveryFee).toLocaleString("pt-AO") } Kz
                             </Text>
                         </View>
                         <View style={styles.summaryRow}>

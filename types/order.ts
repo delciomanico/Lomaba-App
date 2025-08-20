@@ -1,3 +1,5 @@
+import { ReactNode } from "react";
+
 export interface OrderItem {
     unitPrice: any;
     price: any;
@@ -13,11 +15,12 @@ export interface OrderItem {
 export type OrderStatus = "pending" | "confirmed" | "preparing" | "delivering" | "delivered" | "cancelled"
 
 export interface Order {
-    deliveryAddress: ReactNode;
+    estimatedDelivery: string | number | Date;
+    deliveryAddress: string;
     customerPhone: ReactNode;
     customerName: ReactNode;
     deliveryFrete: any;
-    deliveryFee: any;
+    deliveryFee: number;
     createdAt: string | number | Date;
     totalAmount: any;
     id: string

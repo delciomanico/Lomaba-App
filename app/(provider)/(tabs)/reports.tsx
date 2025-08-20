@@ -21,25 +21,25 @@ export default function ProviderReportsScreen() {
     switch (selectedPeriod) {
       case "today":
         return orders.filter((order) => {
-          const orderDate = new Date(order.created_at)
+          const orderDate = new Date(order.createdAt)
           return orderDate >= today
         })
       case "week":
         const weekAgo = new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000)
         return orders.filter((order) => {
-          const orderDate = new Date(order.created_at)
+          const orderDate = new Date(order.createdAt)
           return orderDate >= weekAgo
         })
       case "month":
         const monthAgo = new Date(today.getTime() - 30 * 24 * 60 * 60 * 1000)
         return orders.filter((order) => {
-          const orderDate = new Date(order.created_at)
+          const orderDate = new Date(order.createdAt)
           return orderDate >= monthAgo
         })
       case "year":
         const yearAgo = new Date(today.getTime() - 365 * 24 * 60 * 60 * 1000)
         return orders.filter((order) => {
-          const orderDate = new Date(order.created_at)
+          const orderDate = new Date(order.createdAt)
           return orderDate >= yearAgo
         })
       default:
@@ -51,7 +51,7 @@ export default function ProviderReportsScreen() {
   const deliveredOrders = filteredOrders.filter((order) => order.status === "delivered")
 
   const totalOrders = filteredOrders.length
-  const totalRevenue = deliveredOrders.reduce((sum, order) => sum + order.total_amount, 0)
+  const totalRevenue = deliveredOrders.reduce((sum, order) => sum + order.totalAmount, 0)
   const averageOrderValue = totalOrders > 0 ? totalRevenue / deliveredOrders.length : 0
   const pendingOrders = filteredOrders.filter((order) => order.status === "pending").length
 
@@ -72,7 +72,7 @@ export default function ProviderReportsScreen() {
     },
     {
       title: "Receita Total",
-      value: `${totalRevenue.toLocaleString("pt-AO")} Kz`,
+      value: `${Math.round(totalRevenue).toLocaleString("pt-AO")} Kz`,
       icon: "cash",
       color: "#2196F3",
       subtitle: "Pedidos entregues",

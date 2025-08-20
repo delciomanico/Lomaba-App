@@ -1,10 +1,10 @@
 "use client"
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Dimensions } from "react-native"
-import { SafeAreaView } from "react-native-safe-area-context"
 import { Ionicons } from "@expo/vector-icons"
 import { useRouter } from "expo-router"
-import { useOrders } from "../../../contexts/OrderContext"
+import { Dimensions, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native"
+import { SafeAreaView } from "react-native-safe-area-context"
 import { useAuth } from "../../../contexts/AuthContext"
+import { useOrders } from "../../../contexts/OrderContext"
 
 const { width } = Dimensions.get("window")
 const cardWidth = (width - 45) / 2
@@ -18,17 +18,17 @@ export default function ProviderDashboardScreen() {
   const deliveringOrders = orders.filter((order) => order.status === "delivering").length
   const todayOrders = orders.filter((order) => {
     const today = new Date()
-    const orderDate = new Date(order.created_at)
+    const orderDate = new Date(order.createdAt)
     return orderDate.toDateString() === today.toDateString() && order.provider_id === user?.id
   }).length
 
   const todayRevenue = orders
     .filter((order) => {
       const today = new Date()
-      const orderDate = new Date(order.created_at)
+      const orderDate = new Date(order.createdAt)
       return orderDate.toDateString() === today.toDateString() && order.status === "delivered"
     })
-    .reduce((sum, order) => sum + order.total_amount, 0)
+    .reduce((sum, order) => sum + order.totalAmount, 0)
 
   const statsCards = [
     {
@@ -54,7 +54,7 @@ export default function ProviderDashboardScreen() {
     },
     {
       title: "Receita Hoje",
-      value: `${todayRevenue.toLocaleString("pt-AO")} Kz`,
+      value: `${Math.round(todayRevenue).toLocaleString("pt-AO")} Kz`,
       icon: "cash",
       color: "#2196F3",
       onPress: () => router.push("/(provider)/(tabs)/reports"),
@@ -133,16 +133,16 @@ export default function ProviderDashboardScreen() {
             <TouchableOpacity key={index} style={styles.orderCard} onPress={() => router.push(`/order/${order.id}`)}>
               <View style={styles.orderInfo}>
                 <Text style={styles.orderId}>Pedido #{order.id}</Text>
-                <Text style={styles.customerName}>{order.customer_name}</Text>
+                <Text style={styles.customerName}>{order.customerName}</Text>
                 <Text style={styles.orderTime}>
-                  {new Date(order.created_at).toLocaleTimeString("pt-AO", {
+                  {new Date(order.createdAt).toLocaleTimeString("pt-AO", {
                     hour: "2-digit",
                     minute: "2-digit",
                   })}
                 </Text>
               </View>
               <View style={styles.orderRight}>
-                <Text style={styles.orderTotal}>{order.total_amount.toLocaleString("pt-AO")} Kz</Text>
+                <Text style={styles.orderTotal}>{order.totalAmount.toLocaleString("pt-AO")} Kz</Text>
                 <View style={[styles.orderStatus, { backgroundColor: getStatusColor(order.status) }]}>
                   <Text style={styles.orderStatusText}>{getStatusLabel(order.status)}</Text>
                 </View>
