@@ -1,27 +1,26 @@
 "use client"
 
-import { useState } from "react"
+import { useAuth } from "@/contexts/AuthContext"
+import { useCart } from "@/contexts/CartContext"
+import { useOrders } from "@/contexts/OrderContext"
+import { OrderItem } from "@/types/order"
+import { Ionicons } from "@expo/vector-icons"
+import * as Location from "expo-location"
+import { useRouter } from "expo-router"
+import { useEffect, useState } from "react"
 import {
-  View,
-  Text,
-  StyleSheet,
-  FlatList,
-  TouchableOpacity,
-  Image,
-  TextInput,
   Alert,
+  Image,
   KeyboardAvoidingView,
   Platform,
   ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
 } from "react-native"
 import { SafeAreaView } from "react-native-safe-area-context"
-import { Ionicons } from "@expo/vector-icons"
-import { useRouter } from "expo-router"
-import { useCart } from "@/contexts/CartContext"
-import { useOrders } from "@/contexts/OrderContext"
-import { useAuth } from "@/contexts/AuthContext"
-import { OrderItem } from "@/types/order"
-import * as Location from "expo-location"
 
 export default function CartScreen() {
   const { cartItems, updateQuantity, removeFromCart, getTotalPrice, clearCart } = useCart()
@@ -33,10 +32,30 @@ export default function CartScreen() {
   const [customerName, setCustomerName] = useState(user?.name || "")
   const [customerPhone, setCustomerPhone] = useState(user?.phone || "")
   const [loading, setLoading] = useState(false)
+  const [deliveryFee, setDeliveryFee] = useState<number>(0)
 
-  const deliveryFee = 500
   const subtotal = getTotalPrice()
-  const total = subtotal + deliveryFee
+  const total = subtotal + parseInt(deliveryFee as unknown as string)
+
+  // Calcular a taxa de entrega com base nos produtos do carrinho
+  useEffect(() => {
+    calculateDeliveryFee()
+  }, [cartItems])
+
+  const calculateDeliveryFee = () => {
+    if (cartItems.length === 0) {
+      setDeliveryFee(0)
+      return
+    }
+
+    // Encontrar a maior taxa de entrega entre os produtos (ou outra lógica desejada)
+    //const highestDeliveryFee = Math.max(...cartItems.map(item => parseInt(item.deliveryFee) || 0))
+    //setDeliveryFee(highestDeliveryFee)
+    
+    // Alternativa: somar todas as taxas de entrega
+    const totalDeliveryFee = cartItems.reduce((sum, item) => sum + (parseInt(item.deliveryFee as unknown as string) || 0), 0)
+    setDeliveryFee(totalDeliveryFee)
+  }
 
   const handleQuantityChange = (productId: string, change: number) => {
     const item = cartItems.find((item) => item.id === productId)
@@ -50,7 +69,7 @@ export default function CartScreen() {
 
   const handleCheckout = async () => {
     if (!deliveryAddress.trim()) {
-      Alert.alert("Erro", "Por favor, informe uma descricao do endereço de entrega")
+      Alert.alert("Erro", "Por favor, informe uma descrição do endereço de entrega")
       return
     }
 
@@ -75,7 +94,16 @@ export default function CartScreen() {
 
       const location = await Location.getCurrentPositionAsync({})
       const { latitude, longitude } = location.coords
-      const orderId = await createOrder(orderItems as Omit<OrderItem, "id" | "order_id">[], deliveryAddress,latitude, longitude, customerName, customerPhone)
+      
+      const orderId = await createOrder(
+        orderItems as Omit<OrderItem, "id" | "order_id">[], 
+        deliveryAddress,
+        latitude, 
+        longitude, 
+        customerName, 
+        customerPhone,
+        deliveryFee
+      )
 
       clearCart()
 
@@ -86,99 +114,13 @@ export default function CartScreen() {
         },
       ])
     } catch (error) {
+      console.error("Erro ao processar pedido:", error)
       Alert.alert("Erro", "Erro ao processar pedido. Tente novamente.")
     } finally {
       setLoading(false)
     }
   }
 
-  const renderCartItem = ({ item }: { item: any }) => (
-    <View style={styles.cartItem}>
-      <Image source={{ uri: item.imageUrl }} style={styles.itemImage} />
-      <View style={styles.itemInfo}>
-        <Text style={styles.itemName}>{item.name}</Text>
-        <Text style={styles.itemPrice}>{item.price.toLocaleString("pt-AO")} Kz</Text>
-        <View style={styles.quantityContainer}>
-          <TouchableOpacity
-            style={styles.quantityButton}
-            onPress={() => handleQuantityChange(item.id, -1)}
-            disabled={item.quantity <= 1}
-          >
-            <Ionicons name="remove" size={16} color={item.quantity <= 1 ? "#CCC" : "#FF6B35"} />
-          </TouchableOpacity>
-          <Text style={styles.quantity}>{item.quantity}</Text>
-          <TouchableOpacity style={styles.quantityButton} onPress={() => handleQuantityChange(item.id, 1)}>
-            <Ionicons name="add" size={16} color="#FF6B35" />
-          </TouchableOpacity>
-        </View>
-      </View>
-      <View style={styles.itemRight}>
-        <TouchableOpacity style={styles.removeButton} onPress={() => removeFromCart(item.id)}>
-          <Ionicons name="trash-outline" size={20} color="#F44336" />
-        </TouchableOpacity>
-        <Text style={styles.itemTotal}>{(item.price * item.quantity).toLocaleString("pt-AO")} Kz</Text>
-      </View>
-
-
-    </View>
-  )
-
-  const checkComponent = () => (
-    <View style={styles.checkoutSection}>
-      <View style={styles.deliveryForm}>
-        <Text style={styles.formTitle}>Dados da Entrega</Text>
-
-        <TextInput
-          style={styles.input}
-          placeholder="Nome completo"
-          value={customerName}
-          onChangeText={setCustomerName}
-        />
-
-        <TextInput
-          style={styles.input}
-          placeholder="Telefone"
-          value={customerPhone}
-          onChangeText={setCustomerPhone}
-          keyboardType="phone-pad"
-        />
-
-        <TextInput
-          style={[styles.input, styles.addressInput]}
-          placeholder="Rotulo do Endereço de entrega"
-          value={deliveryAddress}
-          onChangeText={setDeliveryAddress}
-          multiline
-          numberOfLines={3}
-          placeholderTextColor={"#aaa"}
-        />
-      </View>
-
-      <View style={styles.summary}>
-        <View style={styles.summaryRow}>
-          <Text style={styles.summaryLabel}>Subtotal</Text>
-          <Text style={styles.summaryValue}>{subtotal.toLocaleString("pt-AO")} Kz</Text>
-        </View>
-        <View style={styles.summaryRow}>
-          <Text style={styles.summaryLabel}>Taxa de entrega</Text>
-          <Text style={styles.summaryValue}>{deliveryFee.toLocaleString("pt-AO")} Kz</Text>
-        </View>
-        <View style={[styles.summaryRow, styles.totalRow]}>
-          <Text style={styles.totalLabel}>Total</Text>
-          <Text style={styles.totalValue}>{total.toLocaleString("pt-AO")} Kz</Text>
-        </View>
-      </View>
-
-      <TouchableOpacity
-        style={[styles.checkoutButton, loading && styles.checkoutButtonDisabled]}
-        onPress={handleCheckout}
-        disabled={loading}
-      >
-        <Text style={styles.checkoutButtonText}>{loading ? "Processando..." : "Finalizar Pedido"}</Text>
-      </TouchableOpacity>
-    </View>
-
-  )
   if (cartItems.length === 0) {
     return (
       <SafeAreaView style={styles.container}>
@@ -204,128 +146,133 @@ export default function CartScreen() {
 
   return (
     <SafeAreaView style={styles.container}>
-  <KeyboardAvoidingView
-    behavior={Platform.OS === "ios" ? "padding" : "height"}
-    style={styles.keyboardView}
-    keyboardVerticalOffset={Platform.select({ ios: 60, android: 0 })}
-  >
-    {/* Cabeçalho Fixo */}
-    <View style={styles.header}>
-      <TouchableOpacity onPress={() => router.back()}>
-        <Ionicons name="arrow-back" size={24} color="#333" />
-      </TouchableOpacity>
-      <Text style={styles.title}>Carrinho ({cartItems.length})</Text>
-      <TouchableOpacity onPress={clearCart}>
-        <Text style={styles.clearText}>Limpar</Text>
-      </TouchableOpacity>
-    </View>
+      <KeyboardAvoidingView
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
+        style={styles.keyboardView}
+        keyboardVerticalOffset={Platform.select({ ios: 60, android: 0 })}
+      >
+        {/* Cabeçalho Fixo */}
+        <View style={styles.header}>
+          <TouchableOpacity onPress={() => router.back()}>
+            <Ionicons name="arrow-back" size={24} color="#333" />
+          </TouchableOpacity>
+          <Text style={styles.title}>Carrinho ({cartItems.length})</Text>
+          <TouchableOpacity onPress={clearCart}>
+            <Text style={styles.clearText}>Limpar</Text>
+          </TouchableOpacity>
+        </View>
 
-    {/* Conteúdo Rolável */}
-    <ScrollView
-      contentContainerStyle={styles.scrollContainer}
-      keyboardShouldPersistTaps="handled"
-      keyboardDismissMode="interactive"
-    >
-      {/* Formulário de Entrega (parte superior) */}
-      <View style={styles.deliveryForm}>
-        <Text style={styles.formTitle}>Dados da Entrega</Text>
-        
-        <TextInput
-          style={styles.input}
-          placeholder="Nome completo"
-          value={customerName}
-          onChangeText={setCustomerName}
-          returnKeyType="next"
-        />
+        {/* Conteúdo Rolável */}
+        <ScrollView
+          contentContainerStyle={styles.scrollContainer}
+          keyboardShouldPersistTaps="handled"
+          keyboardDismissMode="interactive"
+        >
+          {/* Formulário de Entrega (parte superior) */}
+          <View style={styles.deliveryForm}>
+            <Text style={styles.formTitle}>Dados da Entrega</Text>
+            
+            <TextInput
+              style={styles.input}
+              placeholder="Nome completo"
+              value={customerName}
+              onChangeText={setCustomerName}
+              returnKeyType="next"
+            />
 
-        <TextInput
-          style={styles.input}
-          placeholder="Telefone"
-          value={customerPhone}
-          onChangeText={setCustomerPhone}
-          keyboardType="phone-pad"
-          returnKeyType="next"
-        />
+            <TextInput
+              style={styles.input}
+              placeholder="Telefone"
+              value={customerPhone}
+              onChangeText={setCustomerPhone}
+              keyboardType="phone-pad"
+              returnKeyType="next"
+            />
 
-        <TextInput
-          style={[styles.input, styles.addressInput]}
-          placeholder="Endereço de entrega"
-          value={deliveryAddress}
-          onChangeText={setDeliveryAddress}
-          multiline
-          numberOfLines={3}
-          placeholderTextColor="#aaa"
-          returnKeyType="done"
-        />
-      </View>
+            <TextInput
+              style={[styles.input, styles.addressInput]}
+              placeholder="Endereço de entrega"
+              value={deliveryAddress}
+              onChangeText={setDeliveryAddress}
+              multiline
+              numberOfLines={3}
+              placeholderTextColor="#aaa"
+              returnKeyType="done"
+            />
+          </View>
 
-      {/* Lista de Itens */}
-      {cartItems.map((item) => (
-        <View key={item.id} style={styles.cartItem}>
-          <Image source={{ uri: item.imageUrl }} style={styles.itemImage} />
-          <View style={styles.itemInfo}>
-            <Text style={styles.itemName}>{item.name}</Text>
-            <Text style={styles.itemPrice}>{item.price.toLocaleString("pt-AO")} Kz</Text>
-            <View style={styles.quantityContainer}>
-              <TouchableOpacity
-                style={styles.quantityButton}
-                onPress={() => handleQuantityChange(item.id, -1)}
-                disabled={item.quantity <= 1}
-              >
-                <Ionicons name="remove" size={16} color={item.quantity <= 1 ? "#CCC" : "#FF6B35"} />
-              </TouchableOpacity>
-              <Text style={styles.quantity}>{item.quantity}</Text>
-              <TouchableOpacity 
-                style={styles.quantityButton} 
-                onPress={() => handleQuantityChange(item.id, 1)}
-              >
-                <Ionicons name="add" size={16} color="#FF6B35" />
-              </TouchableOpacity>
+          {/* Lista de Itens */}
+          {cartItems.map((item) => (
+            <View key={item.id} style={styles.cartItem}>
+              <Image source={{ uri: item.image_url }} style={styles.itemImage} />
+              <View style={styles.itemInfo}>
+                <Text style={styles.itemName}>{item.name}</Text>
+                <Text style={styles.itemPrice}>{item.price.toLocaleString("pt-AO")} Kz</Text>
+                {item.deliveryFee > 0 && (
+                  <Text style={styles.deliveryFeeText}>
+                    Frete: {item.deliveryFee.toLocaleString("pt-AO")} Kz
+                  </Text>
+                )}
+                <View style={styles.quantityContainer}>
+                  <TouchableOpacity
+                    style={styles.quantityButton}
+                    onPress={() => handleQuantityChange(item.id, -1)}
+                    disabled={item.quantity <= 1}
+                  >
+                    <Ionicons name="remove" size={16} color={item.quantity <= 1 ? "#CCC" : "#FF6B35"} />
+                  </TouchableOpacity>
+                  <Text style={styles.quantity}>{item.quantity}</Text>
+                  <TouchableOpacity 
+                    style={styles.quantityButton} 
+                    onPress={() => handleQuantityChange(item.id, 1)}
+                  >
+                    <Ionicons name="add" size={16} color="#FF6B35" />
+                  </TouchableOpacity>
+                </View>
+              </View>
+              <View style={styles.itemRight}>
+                <TouchableOpacity 
+                  style={styles.removeButton} 
+                  onPress={() => removeFromCart(item.id)}
+                >
+                  <Ionicons name="trash-outline" size={20} color="#F44336" />
+                </TouchableOpacity>
+                <Text style={styles.itemTotal}>{(item.price * item.quantity).toLocaleString("pt-AO")} Kz</Text>
+              </View>
+            </View>
+          ))}
+
+          {/* Resumo do Pedido */}
+          <View style={styles.summary}>
+            <View style={styles.summaryRow}>
+              <Text style={styles.summaryLabel}>Subtotal</Text>
+              <Text style={styles.summaryValue}>{subtotal.toLocaleString("pt-AO")} Kz</Text>
+            </View>
+            <View style={styles.summaryRow}>
+              <Text style={styles.summaryLabel}>Taxa de entrega</Text>
+              <Text style={styles.summaryValue}>{deliveryFee.toLocaleString("pt-AO")} Kz</Text>
+            </View>
+            <View style={[styles.summaryRow, styles.totalRow]}>
+              <Text style={styles.totalLabel}>Total</Text>
+              <Text style={styles.totalValue}>{total.toLocaleString("pt-AO")} Kz</Text>
             </View>
           </View>
-          <View style={styles.itemRight}>
-            <TouchableOpacity 
-              style={styles.removeButton} 
-              onPress={() => removeFromCart(item.id)}
-            >
-              <Ionicons name="trash-outline" size={20} color="#F44336" />
-            </TouchableOpacity>
-            <Text style={styles.itemTotal}>{(item.price * item.quantity).toLocaleString("pt-AO")} Kz</Text>
-          </View>
-        </View>
-      ))}
+        </ScrollView>
 
-      {/* Resumo do Pedido */}
-      <View style={styles.summary}>
-        <View style={styles.summaryRow}>
-          <Text style={styles.summaryLabel}>Subtotal</Text>
-          <Text style={styles.summaryValue}>{subtotal.toLocaleString("pt-AO")} Kz</Text>
+        {/* Botão Fixo na Parte Inferior */}
+        <View style={styles.footer}>
+          <TouchableOpacity
+            style={[styles.checkoutButton, loading && styles.checkoutButtonDisabled]}
+            onPress={handleCheckout}
+            disabled={loading}
+          >
+            <Text style={styles.checkoutButtonText}>
+              {loading ? "Processando..." : "Finalizar Pedido"}
+            </Text>
+          </TouchableOpacity>
         </View>
-        <View style={styles.summaryRow}>
-          <Text style={styles.summaryLabel}>Taxa de entrega</Text>
-          <Text style={styles.summaryValue}>{deliveryFee.toLocaleString("pt-AO")} Kz</Text>
-        </View>
-        <View style={[styles.summaryRow, styles.totalRow]}>
-          <Text style={styles.totalLabel}>Total</Text>
-          <Text style={styles.totalValue}>{total.toLocaleString("pt-AO")} Kz</Text>
-        </View>
-      </View>
-    </ScrollView>
-
-    {/* Botão Fixo na Parte Inferior */}
-    <View style={styles.footer}>
-      <TouchableOpacity
-        style={[styles.checkoutButton, loading && styles.checkoutButtonDisabled]}
-        onPress={handleCheckout}
-        disabled={loading}
-      >
-        <Text style={styles.checkoutButtonText}>
-          {loading ? "Processando..." : "Finalizar Pedido"}
-        </Text>
-      </TouchableOpacity>
-    </View>
-  </KeyboardAvoidingView>
-</SafeAreaView>
+      </KeyboardAvoidingView>
+    </SafeAreaView>
   )
 }
 
@@ -338,7 +285,12 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   scrollContainer: {
-    paddingBottom: 100, // Espaço para o botão fixo
+    paddingBottom: 100, 
+  },
+  deliveryFeeText: {
+    fontSize: 12,
+    color: "#888",
+    marginBottom: 8,
   },
   header: {
     flexDirection: 'row',

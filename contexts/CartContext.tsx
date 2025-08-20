@@ -15,10 +15,10 @@ interface Product {
     stock_quantity: number
     is_active: boolean
     created_at: string
+    deliveryFee: number
 }
 
 interface CartItem extends Product {
-  imageUrl: string | undefined
   quantity: number
 }
 

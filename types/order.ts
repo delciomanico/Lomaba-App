@@ -53,6 +53,7 @@ export interface OrderContextType {
         longitude: number,
         customerName: string,
         customerPhone: string,
+        deliveryFee: number,
     ) => Promise<string>
     updateOrderStatus: (orderId: string, status: OrderStatus) => Promise<void>
     getOrderById: (orderId: string) => Promise<Order | null>

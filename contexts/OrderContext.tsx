@@ -1,7 +1,7 @@
-import { createContext, useContext, useState, useEffect } from "react"
-import { useAuth } from "./AuthContext";
 import { Order, OrderContextType, OrderItem, OrderStatus } from "@/types/order";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { createContext, useContext, useEffect, useState } from "react";
+import { useAuth } from "./AuthContext";
 
 const API_BASE_URL = "http://192.168.100.23:3333/api/v1";
 
@@ -83,12 +83,12 @@ export function OrderProvider({ children }: { children: React.ReactNode }) {
         longitude: number,
         customerName: string,
         customerPhone: string,
+        deliveryFee: number ,
     ): Promise<string> => {
         setLoading(true)
         setError(null)
         try {
             const subtotal = items.reduce((sum, item) => sum + (item.unit_price * item.quantity), 0)
-            const deliveryFee = 500
             const total_amount = subtotal + deliveryFee
 
             const orderData = await fetchWithAuth('/orders', {
@@ -101,7 +101,7 @@ export function OrderProvider({ children }: { children: React.ReactNode }) {
                     longitude,
                     customerName,
                     customerPhone,
-                    delivery_fee: deliveryFee
+                    deliveryFee,
                 })
             });
 
