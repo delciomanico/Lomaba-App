@@ -204,7 +204,7 @@ export default function CartScreen() {
           {/* Lista de Itens */}
           {cartItems.map((item) => (
             <View key={item.id} style={styles.cartItem}>
-              <Image source={{ uri: item.image_url }} style={styles.itemImage} />
+              <Image source={{ uri: item.imageUrl }} style={styles.itemImage} />
               <View style={styles.itemInfo}>
                 <Text style={styles.itemName}>{item.name}</Text>
                 <Text style={styles.itemPrice}>{item.price.toLocaleString("pt-AO")} Kz</Text>

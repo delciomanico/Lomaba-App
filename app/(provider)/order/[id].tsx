@@ -162,7 +162,7 @@ export default function OrderDetailScreen() {
           <View style={styles.itemsList}>
             {order.items.map((item, index) => (
               <View key={index} style={styles.orderItem}>
-                <Image source={{ uri: item.product.image_url }} style={styles.itemImage} />
+                <Image source={{ uri: item.product.imageUrl }} style={styles.itemImage} />
                 <View style={styles.itemInfo}>
                   <Text style={styles.itemName}>{item.product.name}</Text>
                   <Text style={styles.itemPrice}>{item.unitPrice.toLocaleString("pt-AO")} Kz</Text>

@@ -15,6 +15,7 @@ export interface OrderItem {
 export type OrderStatus = "pending" | "confirmed" | "preparing" | "delivering" | "delivered" | "cancelled"
 
 export interface Order {
+    providerId: ReactNode;
     estimatedDelivery: string | number | Date;
     deliveryAddress: string;
     customerPhone: ReactNode;

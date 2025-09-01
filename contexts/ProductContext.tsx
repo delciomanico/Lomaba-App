@@ -1,5 +1,6 @@
 import AsyncStorage from '@react-native-async-storage/async-storage'
 import React, { createContext, useContext, useState, useEffect } from 'react'
+import { API_BASE_URL } from '@/constants/global'
 
 type UserType = 'client' | 'provider'
 
@@ -62,7 +63,6 @@ interface ProductContextProps {
     error: string | null
 }
 
-const API_BASE_URL = "http://192.168.100.23:3333/api/v1"; // Substitua pela URL da sua API
 
 const ProductContext = createContext<ProductContextProps | undefined>(undefined)
 

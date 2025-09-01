@@ -135,22 +135,7 @@ export default function ProviderProfileScreen() {
           </View>
         </View>
 
-        {/* Business Menu */}
-        <View style={styles.menuSection}>
-          <Text style={styles.menuSectionTitle}>Gestão do Negócio</Text>
-          {businessMenuItems.map((item, index) => (
-            <TouchableOpacity key={index} style={styles.menuItem} onPress={item.onPress}>
-              <View style={styles.menuItemLeft}>
-                <Ionicons name={item.icon as any} size={24} color="#FF6B35" />
-                <View style={styles.menuItemText}>
-                  <Text style={styles.menuItemTitle}>{item.title}</Text>
-                  <Text style={styles.menuItemSubtitle}>{item.subtitle}</Text>
-                </View>
-              </View>
-              <Ionicons name="chevron-forward" size={20} color="#CCC" />
-            </TouchableOpacity>
-          ))}
-        </View>
+        
 
         {/* Settings Menu */}
         <View style={styles.menuSection}>

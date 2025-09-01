@@ -73,7 +73,7 @@ export default function OrderDetailScreen() {
         })
     }
 
-  
+
 
     const handleCancelOrder = async () => {
         setUpdating(true)
@@ -114,7 +114,7 @@ export default function OrderDetailScreen() {
         )
     }
 
-  
+
     const canCancel = order.status == "pending"
 
     return (
@@ -164,19 +164,23 @@ export default function OrderDetailScreen() {
                         </View>
                     </View>
                 </View>
-                 <View style={styles.section}>
+                <View style={styles.section}>
                     <Text style={styles.sectionTitle}>Informações do Entregador</Text>
-                    <View style={styles.customerInfo}>
-                        <View style={styles.infoRow}>
-                            <Ionicons name="person" size={20} color="#666" />
-                            <Text style={styles.infoText}>{order.provider && order.provider.map((value: { name: string })=> value.name)}</Text>
+                    {order.provider ? (
+                        <View style={styles.customerInfo}>
+                            <View style={styles.infoRow}>
+                                <Ionicons name="person" size={20} color="#666" />
+                                <Text style={styles.infoText}>{order.provider.name}</Text>
+                            </View>
+                            <View style={styles.infoRow}>
+                                <Ionicons name="call" size={20} color="#666" />
+                                <Text style={styles.infoText}>{order.provider.phone}</Text>
+                            </View>
                         </View>
-                        <View style={styles.infoRow}>
-                            <Ionicons name="call" size={20} color="#666" />
-                            <Text style={styles.infoText}>{order.provider && order.provider.map((value: { phone: string })=> value.phone)}</Text>
-                        </View>
-                       
-                    </View>
+                    ) : (
+                        <Text style={styles.infoText}>Informações do entregar indisponíveis</Text>
+                    )}
+
                 </View>
 
                 {/* Order Items */}
@@ -186,7 +190,7 @@ export default function OrderDetailScreen() {
                         {order.items?.map((item) => (
                             <View key={item.id} style={styles.orderItem}>
                                 <Image
-                                    source={{ uri: item.product?.image_url || DEFAULT_IMAGE }}
+                                    source={{ uri: item.product?.imageUrl || DEFAULT_IMAGE }}
                                     style={styles.itemImage}
                                 />
                                 <View style={styles.itemInfo}>
@@ -207,7 +211,7 @@ export default function OrderDetailScreen() {
                         <View style={styles.summaryRow}>
                             <Text style={styles.summaryLabel}>Subtotal</Text>
                             <Text style={styles.summaryValue}>
-                                {(order.totalAmount - order.deliveryFee).toLocaleString("pt-AO") } Kz
+                                {(order.totalAmount - order.deliveryFee).toLocaleString("pt-AO")} Kz
                             </Text>
                         </View>
                         <View style={styles.summaryRow}>
@@ -261,25 +265,25 @@ export default function OrderDetailScreen() {
             </ScrollView>
 
             {/* Action Buttons */}
-            
-                <View style={styles.actionButtons}>
-                    {canCancel && (
-                        <TouchableOpacity
-                            style={styles.cancelButton}
-                            onPress={handleCancelOrder}
-                            disabled={updating}
-                        >
-                            {updating ? (
-                                <ActivityIndicator color="white" />
-                            ) : (
-                                <Text style={styles.cancelButtonText}>Cancelar Pedido</Text>
-                            )}
-                        </TouchableOpacity>
-                    )}
 
-                    
-                </View>
-          
+            <View style={styles.actionButtons}>
+                {canCancel && (
+                    <TouchableOpacity
+                        style={styles.cancelButton}
+                        onPress={handleCancelOrder}
+                        disabled={updating}
+                    >
+                        {updating ? (
+                            <ActivityIndicator color="white" />
+                        ) : (
+                            <Text style={styles.cancelButtonText}>Cancelar Pedido</Text>
+                        )}
+                    </TouchableOpacity>
+                )}
+
+
+            </View>
+
         </SafeAreaView>
     )
 }

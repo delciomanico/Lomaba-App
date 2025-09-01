@@ -2,8 +2,10 @@ import { Order, OrderContextType, OrderItem, OrderStatus } from "@/types/order";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { createContext, useContext, useEffect, useState } from "react";
 import { useAuth } from "./AuthContext";
+import * as Location from "expo-location";
+import { API_BASE_URL } from "@/constants/global";
+import { get } from "react-native/Libraries/TurboModule/TurboModuleRegistry";
 
-const API_BASE_URL = "http://192.168.100.23:3333/api/v1";
 
 const OrderContext = createContext<OrderContextType | undefined>(undefined)
 
@@ -23,7 +25,7 @@ export function OrderProvider({ children }: { children: React.ReactNode }) {
 
     const fetchWithAuth = async (url: string, options: RequestInit = {}) => {
         try {
-            const token = await AsyncStorage.getItem('authToken'); 
+            const token = await AsyncStorage.getItem('authToken');
             const response = await fetch(`${API_BASE_URL}${url}`, {
                 ...options,
                 headers: {
@@ -52,7 +54,6 @@ export function OrderProvider({ children }: { children: React.ReactNode }) {
         setError(null)
         try {
             const data = await fetchWithAuth(`/orders`);
-            
             setOrders(data);
         } catch (err: any) {
             console.error("Error loading orders:", err)
@@ -66,7 +67,15 @@ export function OrderProvider({ children }: { children: React.ReactNode }) {
         setLoading(true)
         setError(null)
         try {
-            const data = await fetchWithAuth(`/orders/all`);
+            //const data = await fetchWithAuth(`/orders/all`);
+            const { status } = await Location.requestForegroundPermissionsAsync()
+            if (status !== 'granted') {
+                console.warn('Permissão de localização negada')
+                return
+            }
+            const location = await Location.getCurrentPositionAsync({})
+            const { latitude, longitude } = location.coords
+            const data = await fetchWithAuth(`/orders/nearby?lat=${latitude}&lng=${longitude}`);
             setOrders(data);
         } catch (err: any) {
             console.error("Error loading provider orders:", err)
@@ -83,7 +92,7 @@ export function OrderProvider({ children }: { children: React.ReactNode }) {
         longitude: number,
         customerName: string,
         customerPhone: string,
-        deliveryFee: number ,
+        deliveryFee: number,
     ): Promise<string> => {
         setLoading(true)
         setError(null)
@@ -148,7 +157,7 @@ export function OrderProvider({ children }: { children: React.ReactNode }) {
         setLoading(true)
         setError(null)
         try {
-            const order = await fetchWithAuth(`/orders/${orderId}`);
+           const order = await fetchWithAuth(`/orders/${orderId}`);
             return order;
         } catch (err: any) {
             console.error("Error fetching order:", err)
