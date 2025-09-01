@@ -12,6 +12,7 @@ interface Product {
     zona_id: string
     provider_id: string
     image_url: string
+    imageUrl: string
     stock_quantity: number
     is_active: boolean
     created_at: string
@@ -19,7 +20,6 @@ interface Product {
 }
 
 interface CartItem extends Product {
-  imageUrl: string | undefined
   quantity: number
 }
 
