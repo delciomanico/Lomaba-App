@@ -30,6 +30,7 @@ export default function LoginScreen() {
       Alert.alert("Erro", "Preencha todos os campos")
       return
     }
+    router.replace("/(client)/(tabs)")
 
     setLoading(true)
     try {
