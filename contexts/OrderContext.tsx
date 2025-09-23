@@ -15,13 +15,7 @@ export function OrderProvider({ children }: { children: React.ReactNode }) {
     const [error, setError] = useState<string | null>(null)
     const { user, logout } = useAuth()
 
-    useEffect(() => {
-        if (user?.type === "provider") {
-            loadOrdersProvider();
-        } else {
-            loadOrders();
-        }
-    }, [user]);
+   
 
     const fetchWithAuth = async (url: string, options: RequestInit = {}) => {
         try {

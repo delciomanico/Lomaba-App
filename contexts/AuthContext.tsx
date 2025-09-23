@@ -16,7 +16,10 @@ interface AuthContextType {
   userType: "client" | "provider" | null
   login: (email: string, password: string, type: "client" | "provider") => Promise<RegisterResult>
   register: (name: string, email: string, phone: string, password: string, type: "client" | "provider") => Promise<RegisterResult>
+  updateUser: (id: string | undefined, name: string | undefined, email: string | undefined, phone: string | undefined) => Promise<RegisterResult>
+  changePassword: (newPassword: string, currentPassword:string, confirmPassword: string) => Promise<RegisterResult>
   logout: () => void
+  me: () => Promise<RegisterResult>
   loading: boolean
 }
 
@@ -31,32 +34,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [userType, setUserType] = useState<"client" | "provider" | null>(null)
   const [loading, setLoading] = useState(true)
 
-  useEffect(() => {
-    // Verificar token armazenado (localStorage/AsyncStorage) ao inicializar
-    const checkAuth = async () => {
-      try {
-        // Aqui você pode verificar se há um token JWT armazenado
-        // e fazer uma requisição para validá-lo
-        // Exemplo simplificado:
-        const token = await AsyncStorage.getItem('authToken');
-        //if (token) {
-        //   const response = await fetch(`${API_BASE_URL}/validate-token`, {...});
-        //   if (response.ok) {
-        //     const userData = await response.json();
-        //     setUser(userData);
-        //     setUserType(userData.type);
-        //   }
-        // }
-        setLoading(false)
-      } catch (error) {
-        console.error("Erro ao verificar autenticação:", error)
-        setLoading(false)
-      }
-    }
-
-    checkAuth()
-  }, [])
-
+  
   const login = async (
     email: string,
     password: string,
@@ -81,7 +59,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
 
       // Armazena o token (se necessário)
-     await AsyncStorage.setItem('authToken', data.token);
+      await AsyncStorage.setItem('authToken', data.token);
 
       const loggedInUser: User = {
         id: data.user.id,
@@ -151,6 +129,111 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   }
 
+  const updateUser = async (
+    id: string | undefined,
+    name: string | undefined,
+    email: string | undefined,
+    phone: string | undefined,
+  ): Promise<RegisterResult> => {
+
+    try {
+      const token = await AsyncStorage.getItem('authToken');
+      const response = await fetch(`${API_BASE_URL}/user`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          id: id,
+          name: name,
+          email: email,
+          phone: phone,
+        }),
+      })
+
+      
+      
+      if (!response.ok) {
+        if (response.status === 401) {
+          logout();
+        }
+      }
+     
+      const data = await response.json()
+      if (!data.success) {
+        return { success: false, error: "Erro ao editar informações." }
+      }
+      return { success: true };
+
+    } catch (error) {
+      return { success: false, error: "Erro ao editar informações." + error }
+    }
+  }
+
+  const me = async (): Promise<RegisterResult> => {
+
+    try {
+      if (!user)
+        throw new Error("not exist user");
+      const token = await AsyncStorage.getItem('authToken');
+      const response = await fetch(`${API_BASE_URL}/user/${user.id}`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'authorization': `Bearer ${token}`,
+        },
+      })
+
+      const data = await response.json()
+      if (!data) {
+        throw new Error(data.message || 'Falha ao autenticar.')
+      }
+
+      const loggedInUser: User = {
+        id: data.id,
+        email: data.email,
+        name: data.name,
+        phone: data.phone,
+        type: data.userType
+      }
+
+      setUser(loggedInUser)
+      return { success: true }
+    } catch (error) {
+
+      return { success: false, error: "Erro ao atualizar os dados" }
+    }
+
+  }
+
+  const changePassword = async (newPassword: string, currentPassword:string, confirmPassword: string): Promise<RegisterResult> => {
+
+    try {
+      if (!user)
+        throw new Error("not exist user");
+      const token = await AsyncStorage.getItem('authToken');
+      const response = await fetch(`${API_BASE_URL}/changePassword`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify({newPassword, currentPassword, confirmPassword, email: user.email})
+      })
+
+      const data = await response.json()
+      if (!data.success) {
+        throw new Error(data.message || 'Falha ao alterar senha.')
+      }
+      return { success: true }
+    } catch (error) {
+
+      return { success: false, error: "Erro ao atualizar os senha" }
+    }
+
+  }
+
   const logout = async () => {
     try {
       // Opcional: chamar endpoint de logout na API
@@ -162,8 +245,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       // });
 
       // Remove o token armazenado
-      // await AsyncStorage.removeItem('authToken');
-      
+      await AsyncStorage.removeItem('authToken');
+
       setUser(null)
       setUserType(null)
     } catch (error) {
@@ -178,7 +261,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         userType,
         login,
         register,
+        updateUser,
         logout,
+        me,
+        changePassword,
         loading,
       }}
     >

@@ -23,7 +23,7 @@ interface Zona {
 }
 
 interface Product {
-    imageUrl: string | undefined
+    categoryId: string
     category: string
     id: string
     name: string
@@ -32,9 +32,11 @@ interface Product {
     zona_id: string
     provider_id: string
     image_url: string
+    imageUrl: string
     stock_quantity: number
     is_active: boolean
     created_at: string
+    deliveryFee: number
 }
 
 interface OrderItem {
@@ -54,6 +56,7 @@ interface OrderInput {
 }
 
 interface ProductContextProps {
+    categories: Category[]
     products: Product[]
     zonas: Zona[]
     fetchProductsNearby: (lat: number, lng: number) => Promise<void>
@@ -63,11 +66,18 @@ interface ProductContextProps {
     error: string | null
 }
 
+interface Category{
+    id:string
+    name: string
+    icon: string
+}
+
 
 const ProductContext = createContext<ProductContextProps | undefined>(undefined)
 
 export const ProductProvider = ({ children }: { children: React.ReactNode }) => {
     const [products, setProducts] = useState<Product[]>([])
+    const [categories, setCategories] = useState<Category[]>([])
     const [zonas, setZonas] = useState<Zona[]>([])
     const [loading, setLoading] = useState(false)
     const [error, setError] = useState<string | null>(null)
@@ -161,8 +171,26 @@ export const ProductProvider = ({ children }: { children: React.ReactNode }) => 
         loadZonas()
     }, [])
 
+     // Carregar categorias ao iniciar
+    useEffect(() => {
+        const loadCategory = async () => {
+            try {
+                const data:Category[] = await fetchWithAuth('/categorias')
+                const joinData = [{ id: "all", name: "Todos", icon: "apps" }, ...data]
+                setCategories(joinData)
+            } catch (err) {
+                const joinData = [{ id: "all", name: "Todos", icon: "apps" }]
+                setCategories(joinData)
+                console.error('Erro ao carregar categorias:', err)
+            }
+        }
+        
+        loadCategory()
+    }, [])
+
     return (
         <ProductContext.Provider value={{
+            categories,
             products,
             zonas,
             fetchProductsNearby,

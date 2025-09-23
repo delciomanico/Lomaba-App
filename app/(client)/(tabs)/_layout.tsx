@@ -15,6 +15,7 @@ export default function ClientTabsLayout() {
           height: 60,
           paddingBottom: 8,
           paddingTop: 8,
+          marginBottom: 60,
         },
       }}
     >

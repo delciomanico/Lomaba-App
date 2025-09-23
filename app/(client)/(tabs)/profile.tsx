@@ -4,10 +4,18 @@ import { SafeAreaView } from "react-native-safe-area-context"
 import { Ionicons } from "@expo/vector-icons"
 import { useRouter } from "expo-router"
 import { useAuth } from "../../../contexts/AuthContext"
+import { useEffect } from "react"
 
 export default function ClientProfileScreen() {
-  const { user, logout } = useAuth()
+  const { user, logout, me } = useAuth()
   const router = useRouter()
+
+  useEffect(()=>{
+    async function teste(){
+      await me();
+    };
+    teste();
+  }, []);
 
   const handleLogout = () => {
     Alert.alert("Sair", "Tem certeza que deseja sair da sua conta?", [
@@ -28,25 +36,7 @@ export default function ClientProfileScreen() {
       icon: "person-outline",
       title: "Editar Perfil",
       subtitle: "Alterar dados pessoais",
-      onPress: () => {},
-    },
-    {
-      icon: "location-outline",
-      title: "Endereços",
-      subtitle: "Gerenciar endereços de entrega",
-      onPress: () => {},
-    },
-    {
-      icon: "card-outline",
-      title: "Pagamentos",
-      subtitle: "Métodos de pagamento",
-      onPress: () => {},
-    },
-    {
-      icon: "notifications-outline",
-      title: "Notificações",
-      subtitle: "Configurar notificações",
-      onPress: () => {},
+      onPress: () => router.push('/(client)/config'),
     },
     {
       icon: "help-circle-outline",
@@ -56,9 +46,9 @@ export default function ClientProfileScreen() {
     },
     {
       icon: "information-circle-outline",
-      title: "Sobre",
-      subtitle: "Informações do aplicativo",
-      onPress: () => {},
+      title: "Termos",
+      subtitle: "Termos e Privacidade",
+      onPress: () => router.push('/termos'),
     },
   ]
 
