@@ -12,10 +12,10 @@ export default function ClientTabsLayout() {
           backgroundColor: "white",
           borderTopWidth: 1,
           borderTopColor: "#E5E5E5",
-          height: 60,
+          height: 95,
           paddingBottom: 8,
           paddingTop: 8,
-          marginBottom: 60,
+          marginBottom: 0,
         },
       }}
     >

@@ -26,73 +26,43 @@ export default function ProviderProfileScreen() {
 
   const businessMenuItems = [
     {
-      icon: "storefront-outline",
-      title: "Informações da Empresa",
-      subtitle: "Dados comerciais e documentos",
-      onPress: () => {},
-    },
-    {
-      icon: "cube-outline",
-      title: "Gestão de Estoque",
-      subtitle: "Controlar produtos e quantidades",
-      onPress: () => {},
-    },
-    {
-      icon: "pricetag-outline",
-      title: "Preços e Promoções",
-      subtitle: "Gerenciar preços e ofertas especiais",
-      onPress: () => {},
-    },
-    {
-      icon: "car-outline",
-      title: "Entregadores",
-      subtitle: "Gerenciar equipe de entrega",
-      onPress: () => {},
-    },
-    {
-      icon: "analytics-outline",
-      title: "Relatórios Avançados",
-      subtitle: "Análises detalhadas de vendas",
-      onPress: () => router.push("/(provider)/(tabs)/reports"),
-    },
-  ]
-
-  const settingsMenuItems = [
-    {
       icon: "person-outline",
       title: "Editar Perfil",
       subtitle: "Alterar dados pessoais",
-      onPress: () => {},
-    },
-    {
-      icon: "notifications-outline",
-      title: "Notificações",
-      subtitle: "Configurar alertas e avisos",
-      onPress: () => {},
-    },
-    {
-      icon: "card-outline",
-      title: "Pagamentos",
-      subtitle: "Configurar recebimentos",
-      onPress: () => {},
-    },
-    {
-      icon: "shield-outline",
-      title: "Segurança",
-      subtitle: "Senha e autenticação",
-      onPress: () => {},
+      onPress: () => router.push('/(client)/config'),
     },
     {
       icon: "help-circle-outline",
-      title: "Suporte",
-      subtitle: "Central de ajuda para fornecedores",
+      title: "Ajuda",
+      subtitle: "Central de ajuda e suporte",
       onPress: () => {},
     },
     {
       icon: "information-circle-outline",
-      title: "Sobre o LOMBA",
-      subtitle: "Informações da plataforma",
+      title: "Termos",
+      subtitle: "Termos e Privacidade",
+      onPress: () => router.push('/termos'),
+    },
+  ]
+
+  const settingsMenuItems =  [
+    {
+      icon: "person-outline",
+      title: "Editar Perfil",
+      subtitle: "Alterar dados pessoais",
+      onPress: () => router.push('/(client)/config'),
+    },
+    {
+      icon: "help-circle-outline",
+      title: "Ajuda",
+      subtitle: "Central de ajuda e suporte",
       onPress: () => {},
+    },
+    {
+      icon: "information-circle-outline",
+      title: "Termos",
+      subtitle: "Termos e Privacidade",
+      onPress: () => router.push('/termos'),
     },
   ]
 
